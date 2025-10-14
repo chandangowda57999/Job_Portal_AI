@@ -8,15 +8,15 @@ public class UserMapper {
     // Entity -> DTO
     public static UserDTO userEntityToDto(User user) {
         if (user == null) return null;
-        return new UserDTO(
-                user.getId(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getEmail(),
-                user.getPhoneCountryCode(),
-                user.getPhoneNumber(),
-                user.getUserType()
-        );
+        UserDTO userDtoObj = new UserDTO();
+        userDtoObj.getId();
+        userDtoObj.getFirstName();
+        userDtoObj.getLastName();
+        userDtoObj.getEmail();
+        userDtoObj.getPhoneCountryCode();
+        userDtoObj.getPhoneNumber();
+        userDtoObj.getUserType();
+        return userDtoObj;
     }
 
     // DTO -> Entity (for create)

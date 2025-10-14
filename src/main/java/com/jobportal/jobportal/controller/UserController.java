@@ -1,7 +1,7 @@
 package com.jobportal.jobportal.controller;
 
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,11 +12,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/users")
-@RequiredArgsConstructor
 public class UserController {
-
-    private final UserService service;
-
+	
+	private final UserService service;
+	
+	@Autowired
+    public UserController(UserService service) {   // injected by Spring
+        this.service = service;
+    }
     @PostMapping
     public ResponseEntity<UserDTO> create(@RequestBody UserDTO user) {
         return ResponseEntity.ok(service.create(user));
