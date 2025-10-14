@@ -9,13 +9,13 @@ public class UserMapper {
     public static UserDTO userEntityToDto(User user) {
         if (user == null) return null;
         UserDTO userDtoObj = new UserDTO();
-        userDtoObj.getId();
-        userDtoObj.getFirstName();
-        userDtoObj.getLastName();
-        userDtoObj.getEmail();
-        userDtoObj.getPhoneCountryCode();
-        userDtoObj.getPhoneNumber();
-        userDtoObj.getUserType();
+        userDtoObj.setId(user.getId());
+        userDtoObj.setFirstName(user.getFirstName());
+        userDtoObj.setLastName(user.getLastName());
+        userDtoObj.setEmail(user.getEmail());
+        userDtoObj.setPhoneCountryCode(user.getPhoneCountryCode());
+        userDtoObj.setPhoneNumber(user.getPhoneNumber());
+        userDtoObj.setUserType(user.getUserType());
         return userDtoObj;
     }
 
