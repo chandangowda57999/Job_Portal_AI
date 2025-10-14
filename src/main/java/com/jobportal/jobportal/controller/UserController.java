@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.jobportal.jobportal.entity.User;
+import com.jobportal.jobportal.dto.UserDTO;
 import com.jobportal.jobportal.service.UserService;
 
 import java.util.List;
@@ -18,22 +18,25 @@ public class UserController {
     private final UserService service;
 
     @PostMapping
-    public ResponseEntity<User> create(@RequestBody User user) {
+    public ResponseEntity<UserDTO> create(@RequestBody UserDTO user) {
         return ResponseEntity.ok(service.create(user));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getById(@PathVariable Long id) {
+    public ResponseEntity<UserDTO> getById(@PathVariable Long id) {
         return ResponseEntity.ok(service.getById(id));
     }
-
+    @GetMapping("/by-email/{email}")
+    public ResponseEntity<UserDTO> getByEmail(@PathVariable String email) {
+        return ResponseEntity.ok(service.getByEmail(email));
+    }
     @GetMapping
-    public ResponseEntity<List<User>> getAll() {
-        return ResponseEntity.ok(service.getAll());
+    public ResponseEntity<List<UserDTO>> getAll() {
+        return ResponseEntity.ok(service.getAllUserList());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> update(@PathVariable Long id, @RequestBody User user) {
+    public ResponseEntity<UserDTO> update(@PathVariable Long id, @RequestBody UserDTO user) {
         return ResponseEntity.ok(service.update(id, user));
     }
 
