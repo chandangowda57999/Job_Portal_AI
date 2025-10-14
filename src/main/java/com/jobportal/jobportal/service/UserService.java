@@ -1,49 +1,72 @@
 package com.jobportal.jobportal.service;
 
 
-import lombok.RequiredArgsConstructor;
+import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.jobportal.jobportal.customexceptionhandler.UserNotFoundException;
+import com.jobportal.jobportal.dto.UserDTO;
 import com.jobportal.jobportal.entity.User;
+import com.jobportal.jobportal.mapper.UserMapper;
 import com.jobportal.jobportal.repo.UserRepo;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserService {
 
-	@Autowired
+	
     private UserRepo repo;
+    
+    @Transactional
+	public UserDTO create(UserDTO userDto) {
+	    User entity = UserMapper.dtoToEntity(userDto);
+	    User saved = repo.save(entity);
+	    return UserMapper.userEntityToDto(saved);
+	}
 
-    public User create(User user) {
-        return repo.save(user);
-    }
+	public UserDTO getById(Long id) {
+	    return repo.findById(id)
+	            .map(UserMapper::userEntityToDto)
+	            .orElseThrow(() -> new UserNotFoundException(id));
+	}
 
-    public User getById(Long id) {
-        return repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-    }
+	public UserDTO getByEmail(String email) {
+	    return repo.findByEmail(email)
+	            .map(UserMapper::userEntityToDto)
+	            .orElseThrow(() -> new UserNotFoundException(email));
+	}
 
-    public List<User> getAll() {
-        return repo.findAll();
-    }
+	public List<UserDTO> getAllUserList() {
+	    return repo.findAll().stream()
+	            .map(UserMapper::userEntityToDto)
+	            .toList();
+	}
 
-    public User update(Long id, User updated) {
-        User u = getById(id);
-        u.setFirstName(updated.getFirstName());
-        u.setLastName(updated.getLastName());
-        u.setEmail(updated.getEmail());
-        u.setPhoneCountryCode(updated.getPhoneCountryCode());
-        u.setPhoneNumber(updated.getPhoneNumber());
-        u.setUserType(updated.getUserType());
-        return repo.save(u);
-    }
+	public UserDTO update(Long id, UserDTO dto) {
+	    User existing = repo.findById(id)
+	            .orElseThrow(() -> new UserNotFoundException(id));
 
-    public void delete(Long id) {
-        repo.deleteById(id);
-    }
+	    existing.setFirstName(dto.getFirstName());
+	    existing.setLastName(dto.getLastName());
+	    existing.setEmail(dto.getEmail());
+	    existing.setPhoneCountryCode(dto.getPhoneCountryCode());
+	    existing.setPhoneNumber(dto.getPhoneNumber());
+	    existing.setUserType(dto.getUserType());
+
+	    return UserMapper.userEntityToDto(repo.save(existing));
+	}
+
+	public void delete(Long id) {
+	    if (!repo.existsById(id)) {
+	        throw new UserNotFoundException(id);
+	    }
+	    repo.deleteById(id);
+	}
+
 }
 
