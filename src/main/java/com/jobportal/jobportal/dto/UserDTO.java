@@ -2,100 +2,39 @@ package com.jobportal.jobportal.dto;
 
 import lombok.*;
 
+/**
+ * Data Transfer Object (DTO) for User entity.
+ * Used for transferring user data between layers without exposing entity details.
+ * 
+ * @author Job Portal Team
+ * @version 1.0
+ */
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserDTO {
+    
+    /** Unique identifier for the user */
     private Long id;
+    
+    /** User's first name */
     private String firstName;
+    
+    /** User's last name */
     private String lastName;
+    
+    /** User's email address (unique) */
     private String email;
+    
+    /** User's phone number */
     private String phoneNumber;
+    
+    /** Country code for phone number */
     private String phoneCountryCode;
+    
+    /** Type of user (candidate/employer/admin) */
     private String userType;
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
-	/**
-	 * @return the firstName
-	 */
-	public String getFirstName() {
-		return firstName;
-	}
-	/**
-	 * @param firstName the firstName to set
-	 */
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-	/**
-	 * @return the lastName
-	 */
-	public String getLastName() {
-		return lastName;
-	}
-	/**
-	 * @param lastName the lastName to set
-	 */
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
-	/**
-	 * @return the email
-	 */
-	public String getEmail() {
-		return email;
-	}
-	/**
-	 * @param email the email to set
-	 */
-	public void setEmail(String email) {
-		this.email = email;
-	}
-	/**
-	 * @return the phoneNumber
-	 */
-	public String getPhoneNumber() {
-		return phoneNumber;
-	}
-	/**
-	 * @param phoneNumber the phoneNumber to set
-	 */
-	public void setPhoneNumber(String phoneNumber) {
-		this.phoneNumber = phoneNumber;
-	}
-	/**
-	 * @return the phoneCountryCode
-	 */
-	public String getPhoneCountryCode() {
-		return phoneCountryCode;
-	}
-	/**
-	 * @param phoneCountryCode the phoneCountryCode to set
-	 */
-	public void setPhoneCountryCode(String phoneCountryCode) {
-		this.phoneCountryCode = phoneCountryCode;
-	}
-	/**
-	 * @return the userType
-	 */
-	public String getUserType() {
-		return userType;
-	}
-	/**
-	 * @param userType the userType to set
-	 */
-	public void setUserType(String userType) {
-		this.userType = userType;
-	}
 }
 
 

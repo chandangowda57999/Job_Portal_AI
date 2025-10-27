@@ -3,9 +3,22 @@ package com.jobportal.jobportal.mapper;
 import com.jobportal.jobportal.dto.UserDTO;
 import com.jobportal.jobportal.entity.User;
 
+/**
+ * Mapper class for converting between User entity and UserDTO.
+ * Provides static methods for bidirectional conversion and field application.
+ * 
+ * @author Job Portal Team
+ * @version 1.0
+ */
 public class UserMapper {
 
-    // Entity -> DTO
+    /**
+     * Converts User entity to UserDTO.
+     * Maps all entity fields to corresponding DTO fields.
+     * 
+     * @param user The User entity to convert
+     * @return UserDTO object or null if input is null
+     */
     public static UserDTO userEntityToDto(User user) {
         if (user == null) return null;
         UserDTO userDtoObj = new UserDTO();
@@ -19,7 +32,14 @@ public class UserMapper {
         return userDtoObj;
     }
 
-    // DTO -> Entity (for create)
+    /**
+     * Converts UserDTO to User entity.
+     * Maps all DTO fields to corresponding entity fields.
+     * Used primarily for creating new users.
+     * 
+     * @param dto The UserDTO to convert
+     * @return User entity object or null if input is null
+     */
     public static User dtoToEntity(UserDTO dto) {
         if (dto == null) return null;
         User u = new User();
@@ -33,7 +53,13 @@ public class UserMapper {
         return u;
     }
 
-    // Apply DTO onto existing Entity (for update)
+    /**
+     * Applies UserDTO fields to an existing User entity.
+     * Used for updating existing users without creating new objects.
+     * 
+     * @param dto The UserDTO containing updated values
+     * @param target The existing User entity to update
+     */
     public static void apply(UserDTO dto, User target) {
         if (dto == null || target == null) return;
         target.setFirstName(dto.getFirstName());
