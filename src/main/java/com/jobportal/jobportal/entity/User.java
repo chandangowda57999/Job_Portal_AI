@@ -4,7 +4,15 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.List;
 
+/**
+ * JPA Entity representing a User in the database.
+ * Stores user information and maintains relationship with Resume entities.
+ * 
+ * @author Job Portal Team
+ * @version 1.0
+ */
 @Entity
 @Table(name = "users")
 @Getter
@@ -14,28 +22,47 @@ import java.time.Instant;
 @Builder
 public class User {
 
+    /** Primary key - auto-generated unique identifier */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** User's email address - must be unique */
     @Column(nullable = false, unique = true, length = 190)
     private String email;
 
+    /** User's first name */
     @Column(nullable = false, length = 120)
     private String firstName;
 
+    /** User's last name */
     @Column(nullable = false, length = 120)
     private String lastName;
 
+    /** Country code for phone number */
     private String phoneCountryCode;
+    
+    /** User's phone number */
     private String phoneNumber;
+    
+    /** Type of user - candidate, employer, or admin */
     private String userType;  // candidate/employer/admin
 
+    /** One-to-Many relationship with Resume entities */
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Resume> resumes;
+
+    /** Timestamp when the user was created (immutable) */
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
+    /** Timestamp when the user was last updated */
     private Instant updatedAt;
 
+    /**
+     * JPA callback method executed before persisting a new entity.
+     * Sets creation and update timestamps.
+     */
     @PrePersist
     public void onCreate() {
         var now = Instant.now();
@@ -43,134 +70,12 @@ public class User {
         updatedAt = now;
     }
 
+    /**
+     * JPA callback method executed before updating an existing entity.
+     * Updates the modification timestamp.
+     */
     @PreUpdate
     public void onUpdate() {
         updatedAt = Instant.now();
     }
-
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
-
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	/**
-	 * @return the email
-	 */
-	public String getEmail() {
-		return email;
-	}
-
-	/**
-	 * @param email the email to set
-	 */
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	/**
-	 * @return the firstName
-	 */
-	public String getFirstName() {
-		return firstName;
-	}
-
-	/**
-	 * @param firstName the firstName to set
-	 */
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	/**
-	 * @return the lastName
-	 */
-	public String getLastName() {
-		return lastName;
-	}
-
-	/**
-	 * @param lastName the lastName to set
-	 */
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
-
-	/**
-	 * @return the phoneCountryCode
-	 */
-	public String getPhoneCountryCode() {
-		return phoneCountryCode;
-	}
-
-	/**
-	 * @param phoneCountryCode the phoneCountryCode to set
-	 */
-	public void setPhoneCountryCode(String phoneCountryCode) {
-		this.phoneCountryCode = phoneCountryCode;
-	}
-
-	/**
-	 * @return the phoneNumber
-	 */
-	public String getPhoneNumber() {
-		return phoneNumber;
-	}
-
-	/**
-	 * @param phoneNumber the phoneNumber to set
-	 */
-	public void setPhoneNumber(String phoneNumber) {
-		this.phoneNumber = phoneNumber;
-	}
-
-	/**
-	 * @return the userType
-	 */
-	public String getUserType() {
-		return userType;
-	}
-
-	/**
-	 * @param userType the userType to set
-	 */
-	public void setUserType(String userType) {
-		this.userType = userType;
-	}
-
-	/**
-	 * @return the createdAt
-	 */
-	public Instant getCreatedAt() {
-		return createdAt;
-	}
-
-	/**
-	 * @param createdAt the createdAt to set
-	 */
-	public void setCreatedAt(Instant createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	/**
-	 * @return the updatedAt
-	 */
-	public Instant getUpdatedAt() {
-		return updatedAt;
-	}
-
-	/**
-	 * @param updatedAt the updatedAt to set
-	 */
-	public void setUpdatedAt(Instant updatedAt) {
-		this.updatedAt = updatedAt;
-	}
 }
