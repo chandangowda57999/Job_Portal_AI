@@ -34,7 +34,6 @@ public class ResumeService {
 
     private final ResumeRepo resumeRepo;
     private final UserRepo userRepo;
-    private final ResumeMapper resumeMapper;
 
     // Configuration properties from application.properties
     @Value("${resume.storage.path}")
@@ -51,13 +50,11 @@ public class ResumeService {
      * 
      * @param resumeRepo Repository for resume database operations
      * @param userRepo Repository for user database operations
-     * @param resumeMapper MapStruct mapper for Resume conversions
      */
     @Autowired
-    public ResumeService(ResumeRepo resumeRepo, UserRepo userRepo, ResumeMapper resumeMapper) {
+    public ResumeService(ResumeRepo resumeRepo, UserRepo userRepo) {
         this.resumeRepo = resumeRepo;
         this.userRepo = userRepo;
-        this.resumeMapper = resumeMapper;
     }
 
     /**
@@ -109,7 +106,7 @@ public class ResumeService {
                 .build();
 
         Resume savedResume = resumeRepo.save(resume);
-        return resumeMapper.toDto(savedResume);
+        return ResumeMapper.resumeEntityToDto(savedResume);
     }
 
     /**
@@ -120,7 +117,7 @@ public class ResumeService {
      */
     public List<ResumeDTO> getUserResumes(Long userId) {
         return resumeRepo.findByUserId(userId).stream()
-                .map(resumeMapper::toDto)
+                .map(ResumeMapper::resumeEntityToDto)
                 .toList();
     }
 
@@ -132,7 +129,7 @@ public class ResumeService {
      */
     public ResumeDTO getPrimaryResume(Long userId) {
         return resumeRepo.findByUserIdAndIsPrimaryTrue(userId)
-                .map(resumeMapper::toDto)
+                .map(ResumeMapper::resumeEntityToDto)
                 .orElse(null);
     }
 
@@ -162,7 +159,7 @@ public class ResumeService {
         }
 
         return resumeRepo.findById(resumeId)
-                .map(resumeMapper::toDto)
+                .map(ResumeMapper::resumeEntityToDto)
                 .orElseThrow(() -> new RuntimeException("Resume not found"));
     }
 
