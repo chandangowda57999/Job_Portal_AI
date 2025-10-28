@@ -25,15 +25,18 @@ import com.jobportal.jobportal.repo.UserRepo;
 public class UserService {
 
     private final UserRepo repo;
+    private final UserMapper userMapper;
 
     /**
      * Constructor for UserService.
      * 
      * @param repo Repository for user database operations
+     * @param userMapper MapStruct mapper for User conversions
      */
     @Autowired
-    public UserService(UserRepo repo) {
+    public UserService(UserRepo repo, UserMapper userMapper) {
         this.repo = repo;
+        this.userMapper = userMapper;
     }
     
     /**
@@ -44,9 +47,9 @@ public class UserService {
      */
     @Transactional
     public UserDTO create(UserDTO userDto) {
-        User entity = UserMapper.dtoToEntity(userDto);
+        User entity = userMapper.toEntity(userDto);
         User saved = repo.save(entity);
-        return UserMapper.userEntityToDto(saved);
+        return userMapper.toDto(saved);
     }
 
     /**
@@ -58,7 +61,7 @@ public class UserService {
      */
     public UserDTO getById(Long id) {
         return repo.findById(id)
-            .map(UserMapper::userEntityToDto)
+            .map(userMapper::toDto)
             .orElseThrow(() -> new UserNotFoundException(id));
     }
 
@@ -71,7 +74,7 @@ public class UserService {
      */
     public UserDTO getByEmail(String email) {
         return repo.findByEmail(email)
-            .map(UserMapper::userEntityToDto)
+            .map(userMapper::toDto)
             .orElseThrow(() -> new UserNotFoundException(email));
     }
 
@@ -82,7 +85,7 @@ public class UserService {
      */
     public List<UserDTO> getAllUserList() {
         return repo.findAll().stream()
-            .map(UserMapper::userEntityToDto)
+            .map(userMapper::toDto)
             .toList();
     }
 
@@ -98,13 +101,8 @@ public class UserService {
     public UserDTO update(Long id, UserDTO dto) {
         User existing = repo.findById(id)
             .orElseThrow(() -> new UserNotFoundException(id));
-        existing.setFirstName(dto.getFirstName());
-        existing.setLastName(dto.getLastName());
-        existing.setEmail(dto.getEmail());
-        existing.setPhoneCountryCode(dto.getPhoneCountryCode());
-        existing.setPhoneNumber(dto.getPhoneNumber());
-        existing.setUserType(dto.getUserType());
-        return UserMapper.userEntityToDto(repo.save(existing));
+        userMapper.updateEntity(dto, existing);
+        return userMapper.toDto(repo.save(existing));
     }
 
     /**
