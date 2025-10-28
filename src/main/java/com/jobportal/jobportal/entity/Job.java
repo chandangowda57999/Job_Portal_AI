@@ -3,6 +3,7 @@ package com.jobportal.jobportal.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
@@ -18,18 +19,65 @@ public class Job {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 190)
-    private String email;
+    @Column(nullable = false, length = 200)
+    private String title;
 
-    @Column(nullable = false, length = 120)
-    private String firstName;
+    @Column(nullable = false, length = 100)
+    private String company;
 
-    @Column(nullable = false, length = 120)
-    private String lastName;
+    @Column(length = 100)
+    private String location;
 
-    private String phoneCountryCode;
-    private String phoneNumber;
-    private String userType;  // candidate/employer/admin
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private JobType jobType; // FULL_TIME, PART_TIME, CONTRACT, INTERNSHIP
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private JobStatus status; // ACTIVE, INACTIVE, CLOSED
+
+    @Column(length = 50)
+    private String experienceLevel; // ENTRY, MID, SENIOR, EXECUTIVE
+
+    @Column(length = 100)
+    private String department;
+
+    @Column(length = 100)
+    private String category; // IT, FINANCE, MARKETING, etc.
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Column(columnDefinition = "TEXT")
+    private String requirements;
+
+    @Column(columnDefinition = "TEXT")
+    private String responsibilities;
+
+    @Column(columnDefinition = "TEXT")
+    private String benefits;
+
+    private BigDecimal salaryMin;
+    private BigDecimal salaryMax;
+    private String salaryCurrency;
+
+    @Column(length = 50)
+    private String workMode; // REMOTE, ONSITE, HYBRID
+
+    @Column(length = 100)
+    private String educationLevel; // HIGH_SCHOOL, BACHELOR, MASTER, PHD
+
+    @Column(length = 100)
+    private String skills; // Comma-separated skills
+
+    @Column(name = "posted_by")
+    private Long postedBy; // Foreign key to User entity (employer)
+
+    @Column(name = "application_deadline")
+    private Instant applicationDeadline;
+
+    @Column(name = "start_date")
+    private Instant startDate;
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
@@ -48,129 +96,12 @@ public class Job {
         updatedAt = Instant.now();
     }
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    // Enums for better type safety
+    public enum JobType {
+        FULL_TIME, PART_TIME, CONTRACT, INTERNSHIP
+    }
 
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	/**
-	 * @return the email
-	 */
-	public String getEmail() {
-		return email;
-	}
-
-	/**
-	 * @param email the email to set
-	 */
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	/**
-	 * @return the firstName
-	 */
-	public String getFirstName() {
-		return firstName;
-	}
-
-	/**
-	 * @param firstName the firstName to set
-	 */
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	/**
-	 * @return the lastName
-	 */
-	public String getLastName() {
-		return lastName;
-	}
-
-	/**
-	 * @param lastName the lastName to set
-	 */
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
-
-	/**
-	 * @return the phoneCountryCode
-	 */
-	public String getPhoneCountryCode() {
-		return phoneCountryCode;
-	}
-
-	/**
-	 * @param phoneCountryCode the phoneCountryCode to set
-	 */
-	public void setPhoneCountryCode(String phoneCountryCode) {
-		this.phoneCountryCode = phoneCountryCode;
-	}
-
-	/**
-	 * @return the phoneNumber
-	 */
-	public String getPhoneNumber() {
-		return phoneNumber;
-	}
-
-	/**
-	 * @param phoneNumber the phoneNumber to set
-	 */
-	public void setPhoneNumber(String phoneNumber) {
-		this.phoneNumber = phoneNumber;
-	}
-
-	/**
-	 * @return the userType
-	 */
-	public String getUserType() {
-		return userType;
-	}
-
-	/**
-	 * @param userType the userType to set
-	 */
-	public void setUserType(String userType) {
-		this.userType = userType;
-	}
-
-	/**
-	 * @return the createdAt
-	 */
-	public Instant getCreatedAt() {
-		return createdAt;
-	}
-
-	/**
-	 * @param createdAt the createdAt to set
-	 */
-	public void setCreatedAt(Instant createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	/**
-	 * @return the updatedAt
-	 */
-	public Instant getUpdatedAt() {
-		return updatedAt;
-	}
-
-	/**
-	 * @param updatedAt the updatedAt to set
-	 */
-	public void setUpdatedAt(Instant updatedAt) {
-		this.updatedAt = updatedAt;
-	}
+    public enum JobStatus {
+        ACTIVE, INACTIVE, CLOSED
+    }
 }
