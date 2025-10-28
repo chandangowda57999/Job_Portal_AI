@@ -15,14 +15,16 @@ A Spring Boot REST API for managing users and their resumes in a resume manageme
 
 ## Features
 
-- CRUD operations for Users
-- Resume upload and management
-- Multiple resumes per user with primary resume selection
-- File storage for PDF and Word documents
-- RESTful API endpoints
-- MySQL database integration
-- Docker containerization
-- API documentation with Swagger
+- **User Management**: CRUD operations for Users with role-based types (candidate/employer/admin)
+- **Job Posting System**: Complete job management with search and filtering
+- **Resume Management**: Upload and manage multiple resumes with primary resume selection
+- **File Storage**: Support for PDF and Word documents (up to 10MB)
+- **Input Validation**: Comprehensive field-level and business logic validation
+- **Error Handling**: Standardized error responses with detailed validation messages
+- **RESTful API**: Well-structured endpoints following REST principles
+- **MySQL Database**: Persistent data storage with JPA/Hibernate
+- **Docker Support**: Containerized MySQL deployment
+- **API Documentation**: Interactive Swagger UI for testing and documentation
 
 ## Prerequisites
 
@@ -115,9 +117,23 @@ Base URL: `http://localhost:8081/api/v1/users`
 - `GET /api/v1/users` - Get all users
 - `GET /api/v1/users/{id}` - Get user by ID
 - `GET /api/v1/users/by-email/{email}` - Get user by email
-- `POST /api/v1/users` - Create a new user
-- `PUT /api/v1/users/{id}` - Update a user
+- `POST /api/v1/users` - Create a new user (with validation)
+- `PUT /api/v1/users/{id}` - Update a user (with validation)
 - `DELETE /api/v1/users/{id}` - Delete a user
+
+### Jobs API
+
+Base URL: `http://localhost:8081/api/v1/job`
+
+- `GET /api/v1/job` - Get all jobs
+- `GET /api/v1/job/{id}` - Get job by ID
+- `GET /api/v1/job/company/{company}` - Get jobs by company
+- `GET /api/v1/job/location/{location}` - Get jobs by location
+- `GET /api/v1/job/type/{jobType}` - Get jobs by type (FULL_TIME, PART_TIME, CONTRACT, INTERNSHIP)
+- `GET /api/v1/job/active` - Get all active jobs
+- `POST /api/v1/job` - Create a new job (with validation)
+- `PUT /api/v1/job/{id}` - Update a job (with validation)
+- `DELETE /api/v1/job/{id}` - Delete a job
 
 ### Resume Management API
 
@@ -137,6 +153,8 @@ Once the application is running, you can access:
 - **Swagger UI**: http://localhost:8081/swagger-ui.html
 - **API Docs (JSON)**: http://localhost:8081/api-docs
 - **Actuator**: http://localhost:8081/actuator
+
+For detailed information about input validation, error handling, and examples, see [VALIDATION_GUIDE.md](VALIDATION_GUIDE.md)
 
 ## Project Structure
 

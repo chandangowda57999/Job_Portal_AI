@@ -1,5 +1,6 @@
 package com.jobportal.jobportal.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +40,7 @@ public class UserController {
      * @return ResponseEntity containing the created user details
      */
     @PostMapping
-    public ResponseEntity<UserDTO> create(@RequestBody UserDTO user) {
+    public ResponseEntity<UserDTO> create(@Valid @RequestBody UserDTO user) {
         return ResponseEntity.ok(service.create(user));
     }
 
@@ -83,7 +84,7 @@ public class UserController {
      * @return ResponseEntity containing the updated user details
      */
     @PutMapping("/{id}")
-    public ResponseEntity<UserDTO> update(@PathVariable Long id, @RequestBody UserDTO user) {
+    public ResponseEntity<UserDTO> update(@PathVariable Long id, @Valid @RequestBody UserDTO user) {
         return ResponseEntity.ok(service.update(id, user));
     }
 

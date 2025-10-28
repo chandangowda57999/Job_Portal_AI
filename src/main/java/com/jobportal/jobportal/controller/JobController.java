@@ -1,5 +1,6 @@
 package com.jobportal.jobportal.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class JobController {
     }
     
     @PostMapping
-    public ResponseEntity<JobDTO> create(@RequestBody JobDTO job) {
+    public ResponseEntity<JobDTO> create(@Valid @RequestBody JobDTO job) {
         return ResponseEntity.ok(service.create(job));
     }
 
@@ -57,7 +58,7 @@ public class JobController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<JobDTO> update(@PathVariable Long id, @RequestBody JobDTO job) {
+    public ResponseEntity<JobDTO> update(@PathVariable Long id, @Valid @RequestBody JobDTO job) {
         return ResponseEntity.ok(service.update(id, job));
     }
 
