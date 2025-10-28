@@ -74,6 +74,13 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- MapStruct for automatic mapping -->
+    <dependency>
+      <groupId>org.mapstruct</groupId>
+      <artifactId>mapstruct</artifactId>
+      <version>1.6.3</version>
+    </dependency>
+
     <!-- Devtools (dev only) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -110,6 +117,11 @@
               <groupId>org.projectlombok</groupId>
               <artifactId>lombok</artifactId>
               <version>1.18.42</version>
+            </path>
+            <path>
+              <groupId>org.mapstruct</groupId>
+              <artifactId>mapstruct-processor</artifactId>
+              <version>1.6.3</version>
             </path>
           </annotationProcessorPaths>
         </configuration>
