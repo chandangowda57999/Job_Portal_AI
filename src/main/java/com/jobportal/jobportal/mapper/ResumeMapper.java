@@ -2,67 +2,45 @@ package com.jobportal.jobportal.mapper;
 
 import com.jobportal.jobportal.dto.ResumeDTO;
 import com.jobportal.jobportal.entity.Resume;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 /**
- * Mapper class for converting between Resume entity and ResumeDTO.
- * Provides static methods for bidirectional conversion.
+ * MapStruct mapper for converting between Resume entity and ResumeDTO.
+ * Automatically generates mapping implementations at compile time.
  * 
  * @author Job Portal Team
- * @version 1.0
+ * @version 2.0
  */
-public class ResumeMapper {
+@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+public interface ResumeMapper {
 
     /**
      * Converts Resume entity to ResumeDTO.
-     * Maps all entity fields to corresponding DTO fields.
+     * Maps user relationship to userId field.
      * 
      * @param resume The Resume entity to convert
      * @return ResumeDTO object or null if input is null
      */
-    public static ResumeDTO resumeEntityToDto(Resume resume) {
-        if (resume == null) {
-            return null;
-        }
-
-        return ResumeDTO.builder()
-                .id(resume.getId())
-                .fileName(resume.getFileName())
-                .fileType(resume.getFileType())
-                .fileSize(resume.getFileSize())
-                .filePath(resume.getFilePath())
-                .originalFileName(resume.getOriginalFileName())
-                .isPrimary(resume.getIsPrimary())
-                .description(resume.getDescription())
-                .userId(resume.getUser() != null ? resume.getUser().getId() : null)
-                .createdAt(resume.getCreatedAt())
-                .updatedAt(resume.getUpdatedAt())
-                .build();
-    }
+    @Mapping(source = "user.id", target = "userId")
+    ResumeDTO toDto(Resume resume);
 
     /**
      * Converts ResumeDTO to Resume entity.
-     * Maps all DTO fields to corresponding entity fields.
      * Note: User relationship is not set in this method.
      * 
      * @param resumeDto The ResumeDTO to convert
      * @return Resume entity object or null if input is null
      */
-    public static Resume dtoToEntity(ResumeDTO resumeDto) {
-        if (resumeDto == null) {
-            return null;
-        }
+    Resume toEntity(ResumeDTO resumeDto);
 
-        return Resume.builder()
-                .id(resumeDto.getId())
-                .fileName(resumeDto.getFileName())
-                .fileType(resumeDto.getFileType())
-                .fileSize(resumeDto.getFileSize())
-                .filePath(resumeDto.getFilePath())
-                .originalFileName(resumeDto.getOriginalFileName())
-                .isPrimary(resumeDto.getIsPrimary())
-                .description(resumeDto.getDescription())
-                .createdAt(resumeDto.getCreatedAt())
-                .updatedAt(resumeDto.getUpdatedAt())
-                .build();
-    }
+    /**
+     * Updates an existing Resume entity with values from ResumeDTO.
+     * 
+     * @param dto The ResumeDTO containing updated values
+     * @param target The existing Resume entity to update
+     */
+    void updateEntity(ResumeDTO dto, @MappingTarget Resume target);
 }
