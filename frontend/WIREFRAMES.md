@@ -244,3 +244,116 @@ All layout CSS is in `src/pages/SignIn/SignIn.css`:
 ---
 
 Last Updated: October 29, 2025
+
+
+---
+
+## Post-Sign In Wireframes
+
+### Dashboard (Overview)
+```
+┌──────────────────────────────────────────────────────────────┐
+│  [Logo] JobPortal AI        [Search box........]  [Profile]  │
+│  ─────────────────────────────────────────────────────────   │
+│  [Stats: Matches | Applied | Interviews | Saved]              │
+│  ─────────────────────────────────────────────────────────   │
+│  Recommended For You                                          │
+│  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐     │
+│  │ Company A │ │ Company B │ │ Company C │ │ Company D │ ... │
+│  │ Role      │ │ Role      │ │ Role      │ │ Role      │     │
+│  │ [Save]    │ │ [Save]    │ │ [Save]    │ │ [Save]    │     │
+│  └───────────┘ └───────────┘ └───────────┘ └───────────┘     │
+│  ─────────────────────────────────────────────────────────   │
+│  Recent Applications                                          │
+│  [A] Role @ Company   Status: Screening   [View]              │
+│  [B] Role @ Company   Status: Interview   [View]              │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### Job Search / Listing
+```
+┌──────────────────────────────────────────────────────────────┐
+│ [Logo]   [Search roles, skills, location..............][Go]  │
+│ [Filters] Location ▾ | Type ▾ | Experience ▾ | Salary ▾      │
+│ ─────────────────────────────────────────────────────────   │
+│ [List]                                                       │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │ Role @ Company • Location • $ • Full-time               │ │
+│ │ [Badges: Remote, Urgent]                                │ │
+│ │ Summary text...                                         │ │
+│ │ [Save] [Apply]                                          │ │
+│ └─────────────────────────────────────────────────────────┘ │
+│ (Pagination) « 1 2 3 »                                      │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### Job Detail
+```
+┌──────────────────────────────────────────────────────────────┐
+│ [Back]  Role Title @ Company               [Save] [Apply Now] │
+│ Location • Compensation • Type • Posted Xd                    │
+│ ─────────────────────────────────────────────────────────   │
+│ Tabs: Description | Requirements | Company | Similar Jobs     │
+│ [Description content text…]                                   │
+│ Key Skills: [React] [Java] [SQL] [Leadership]                 │
+│ ─────────────────────────────────────────────────────────   │
+│ Similar Jobs                                                  │
+│  • Role @ Company (short line) [View]                         │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### Applications Tracker
+```
+┌──────────────────────────────────────────────────────────────┐
+│ Applications    [Filter: All ▾]  [Sort: Recent ▾]            │
+│ ─────────────────────────────────────────────────────────   │
+│ [Pipeline]  Applied → Screening → Interview → Offer → Hired  │
+│                                                              │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │ Role @ Company  • Applied: May 10                        │ │
+│ │ Notes: ...                                              │ │
+│ │ Status: Screening  [Update Status ▾]  [View Job]        │ │
+│ └─────────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### Resume Upload / Builder
+```
+┌──────────────────────────────────────────────────────────────┐
+│ Resume                                                       │
+│ [Upload PDF] or [Build Online]                               │
+│ ─────────────────────────────────────────────────────────   │
+│ Sections: Summary | Experience | Education | Skills | Links  │
+│ ┌───────────────┐  ┌──────────────────────────────────────┐ │
+│ │ Field list    │  │ Editable form with live preview      │ │
+│ │ + Add Section │  │ [Preview pane (right on desktop)]    │ │
+│ └───────────────┘  └──────────────────────────────────────┘ │
+│ [Save] [Export PDF]                                          │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### AI Recommendations (Explainable)
+```
+┌──────────────────────────────────────────────────────────────┐
+│ AI Matches  [Refresh]  [Adjust Preferences]                  │
+│ Why these jobs: [Skills fit 85%] [Location match] [History]  │
+│ ─────────────────────────────────────────────────────────   │
+│ [Card] Role @ Company  Fit: 88%                              │
+│ Factors: React(✓), Java(✓), Leadership(△)                    │
+│ [Improve fit] → Suggested courses/projects                    │
+│ [Save] [Apply]                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### Profile & Settings
+```
+┌──────────────────────────────────────────────────────────────┐
+│ Profile                                                       │
+│ [Avatar] Name        [Edit]                                  │
+│ Email • Phone • Location • Role                              │
+│ Preferences: Locations ▾ | Roles ▾ | Salary ▾                │
+│ Notifications: [Email ▢] [SMS ▢] [In‑app ▣]                  │
+│ Privacy: Resume visibility ▾                                 │
+│ [Save Changes]                                               │
+└──────────────────────────────────────────────────────────────┘
+```
