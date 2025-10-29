@@ -1,0 +1,1074 @@
+/**
+ * SignIn Page Styles
+ * Enhanced with ultra-rich user experience, smooth animations, and premium hover effects
+ * Everything is self-contained within this page - no external component dependencies
+ */
+
+/* ============================================
+   PAGE CONTAINER & BACKGROUND
+   ============================================ */
+
+.signin {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-4);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--primary-50) 0%, var(--secondary-50) 100%);
+}
+
+/* Multi-layer animated background */
+.signin__background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+}
+
+.signin__background-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+}
+
+.signin__background-layer--1 {
+  background: var(--gradient-primary);
+  opacity: 0.1;
+  animation: gradientShift 20s ease infinite;
+  background-size: 200% 200%;
+  transform: scale(1.2) rotate(0deg);
+}
+
+.signin__background-layer--2 {
+  background: linear-gradient(45deg, var(--secondary-500) 0%, var(--primary-500) 100%);
+  opacity: 0.08;
+  animation: gradientShift 25s ease infinite reverse;
+  background-size: 300% 300%;
+  transform: scale(1.5) rotate(120deg);
+}
+
+.signin__background-layer--3 {
+  background: radial-gradient(circle, var(--primary-400) 0%, transparent 70%);
+  opacity: 0.06;
+  animation: float 15s ease-in-out infinite;
+  transform: scale(2) rotate(240deg);
+}
+
+/* Floating particles */
+.signin__particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.signin__particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--primary-400);
+  border-radius: 50%;
+  opacity: 0.6;
+  animation: float 8s ease-in-out infinite;
+}
+
+.signin__particle--1 { top: 10%; left: 10%; animation-delay: 0s; }
+.signin__particle--2 { top: 20%; left: 20%; animation-delay: 1s; }
+.signin__particle--3 { top: 30%; left: 30%; animation-delay: 2s; }
+.signin__particle--4 { top: 40%; left: 40%; animation-delay: 3s; }
+.signin__particle--5 { top: 50%; left: 50%; animation-delay: 4s; }
+.signin__particle--6 { top: 60%; left: 60%; animation-delay: 5s; }
+.signin__particle--7 { top: 70%; left: 70%; animation-delay: 6s; }
+.signin__particle--8 { top: 80%; left: 80%; animation-delay: 7s; }
+.signin__particle--9 { top: 15%; left: 85%; animation-delay: 0.5s; }
+.signin__particle--10 { top: 25%; left: 75%; animation-delay: 1.5s; }
+.signin__particle--11 { top: 35%; left: 65%; animation-delay: 2.5s; }
+.signin__particle--12 { top: 45%; left: 55%; animation-delay: 3.5s; }
+.signin__particle--13 { top: 55%; left: 45%; animation-delay: 4.5s; }
+.signin__particle--14 { top: 65%; left: 35%; animation-delay: 5.5s; }
+.signin__particle--15 { top: 75%; left: 25%; animation-delay: 6.5s; }
+.signin__particle--16 { top: 85%; left: 15%; animation-delay: 7.5s; }
+.signin__particle--17 { top: 5%; left: 50%; animation-delay: 0.2s; }
+.signin__particle--18 { top: 95%; left: 50%; animation-delay: 0.8s; }
+.signin__particle--19 { top: 50%; left: 5%; animation-delay: 1.2s; }
+.signin__particle--20 { top: 50%; left: 95%; animation-delay: 1.8s; }
+
+/* ============================================
+   MAIN CONTENT CONTAINER
+   ============================================ */
+
+.signin__container {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  animation: slideUp var(--transition-slow) var(--ease-out);
+}
+
+/* ============================================
+   HEADER SECTION
+   ============================================ */
+
+.signin__header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  animation: fadeIn 0.8s var(--ease-out);
+}
+
+/* Enhanced logo with glow effect */
+.signin__logo {
+  margin-bottom: var(--space-2);
+  position: relative;
+  cursor: pointer;
+  transition: all var(--transition-medium);
+  animation: scaleIn 0.6s var(--ease-bounce);
+}
+
+.signin__logo:hover {
+  transform: scale(1.15) rotate(10deg);
+}
+
+.signin__logo svg {
+  filter: drop-shadow(0 8px 20px rgba(102, 126, 234, 0.4));
+  transition: filter var(--transition-base);
+}
+
+.signin__logo:hover svg {
+  filter: drop-shadow(0 12px 30px rgba(102, 126, 234, 0.6));
+}
+
+.signin__logo-glow {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  background: radial-gradient(circle, rgba(102, 126, 234, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+  z-index: -1;
+}
+
+/* Enhanced title with animated underline */
+.signin__title {
+  font-size: var(--text-4xl);
+  font-weight: var(--font-bold);
+  font-family: var(--font-family-heading);
+  margin: 0;
+  letter-spacing: -0.5px;
+  animation: slideDown 0.8s var(--ease-out);
+  position: relative;
+}
+
+.signin__title-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+  animation: gradientShift 5s ease infinite;
+  position: relative;
+  z-index: 1;
+}
+
+.signin__title-underline {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 3px;
+  background: var(--gradient-primary);
+  border-radius: 2px;
+  animation: expandWidth 1s var(--ease-out) 0.5s forwards;
+}
+
+.signin__subtitle {
+  font-size: var(--text-base);
+  color: var(--gray-600);
+  margin: 0;
+  font-weight: var(--font-medium);
+  animation: fadeIn 1s var(--ease-out);
+  animation-delay: 0.2s;
+  opacity: 0;
+  animation-fill-mode: forwards;
+}
+
+/* ============================================
+   SIGN-IN CARD
+   ============================================ */
+
+.signin__card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-10);
+  box-shadow: var(--shadow-2xl);
+  animation: slideUp 0.8s var(--ease-out);
+  animation-delay: 0.3s;
+  opacity: 0;
+  animation-fill-mode: forwards;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-medium);
+}
+
+.signin__card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: var(--gradient-shine);
+  transition: left var(--transition-slow);
+  z-index: 1;
+}
+
+.signin__card:hover {
+  box-shadow: var(--shadow-primary), var(--shadow-2xl);
+  transform: translateY(-6px);
+}
+
+.signin__card:hover::before {
+  left: 100%;
+}
+
+.signin__card--loading {
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+.signin__card--loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 10;
+}
+
+.signin__card-header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+  position: relative;
+  z-index: 2;
+}
+
+.signin__card-header h2 {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--gray-800);
+  margin: 0 0 var(--space-2) 0;
+  font-family: var(--font-family-heading);
+}
+
+.signin__card-header p {
+  font-size: var(--text-sm);
+  color: var(--gray-600);
+  margin: 0;
+  font-weight: var(--font-medium);
+}
+
+/* ============================================
+   ERROR MESSAGE
+   ============================================ */
+
+.signin__error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+  border: 1px solid var(--error-light);
+  border-radius: var(--radius-lg);
+  color: var(--error-dark);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-6);
+  animation: shake 0.5s var(--ease-out), slideDown 0.3s var(--ease-out);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  z-index: 2;
+}
+
+.signin__error svg {
+  flex-shrink: 0;
+  color: var(--error);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+/* ============================================
+   SOCIAL LOGIN SECTION
+   ============================================ */
+
+.signin__social {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+  position: relative;
+  z-index: 2;
+}
+
+/* ============================================
+   DIVIDER
+   ============================================ */
+
+.signin__divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: var(--space-6) 0;
+  position: relative;
+  z-index: 2;
+}
+
+.signin__divider-line {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--gray-200) 50%, transparent 100%);
+  transition: all var(--transition-base);
+}
+
+.signin__divider:hover .signin__divider-line {
+  background: linear-gradient(90deg, transparent 0%, var(--primary-300) 50%, transparent 100%);
+}
+
+.signin__divider span {
+  padding: 0 var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--gray-500);
+  transition: color var(--transition-base);
+}
+
+.signin__divider:hover span {
+  color: var(--primary-600);
+}
+
+/* ============================================
+   FORM
+   ============================================ */
+
+.signin__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  position: relative;
+  z-index: 2;
+}
+
+/* ============================================
+   INPUT STYLES (Floating Label)
+   ============================================ */
+
+.input {
+  position: relative;
+  margin-bottom: var(--space-4);
+}
+
+.input--floating .input__container {
+  position: relative;
+}
+
+.input__field {
+  width: 100%;
+  padding: var(--space-4) var(--space-4) var(--space-2) var(--space-4);
+  font-size: var(--text-base);
+  font-family: var(--font-family-base);
+  color: var(--gray-800);
+  background-color: transparent;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+  outline: none;
+}
+
+.input__field::placeholder {
+  color: transparent;
+}
+
+.input__field:focus,
+.input__field:not(:placeholder-shown) {
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+.input__field--focused {
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+  transform: translateY(-2px);
+}
+
+.input__field--error {
+  border-color: var(--error);
+  background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%);
+  animation: shake 0.5s var(--ease-out);
+}
+
+.input__label {
+  position: absolute;
+  top: 50%;
+  left: var(--space-4);
+  transform: translateY(-50%);
+  font-size: var(--text-base);
+  color: var(--gray-500);
+  pointer-events: none;
+  transition: all var(--transition-base);
+  background: white;
+  padding: 0 var(--space-1);
+}
+
+.input__field:focus ~ .input__label,
+.input__field:not(:placeholder-shown) ~ .input__label {
+  top: 0;
+  font-size: var(--text-xs);
+  color: var(--primary-600);
+  font-weight: var(--font-semibold);
+}
+
+.input__required {
+  color: var(--error);
+  font-weight: var(--font-bold);
+  margin-left: var(--space-1);
+}
+
+.input__focus-line {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background: var(--gradient-primary);
+  transition: width var(--transition-base);
+}
+
+.input__field:focus ~ .input__focus-line {
+  width: 100%;
+}
+
+.input__toggle-password {
+  position: absolute;
+  right: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--gray-500);
+  cursor: pointer;
+  padding: var(--space-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-base);
+  border-radius: var(--radius-sm);
+}
+
+.input__toggle-password:hover {
+  color: var(--primary-600);
+  background-color: var(--primary-50);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.input__error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--error-dark);
+  margin-top: var(--space-2);
+  font-weight: var(--font-medium);
+  animation: slideDown var(--transition-base) var(--ease-out);
+}
+
+.input__error svg {
+  flex-shrink: 0;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+/* ============================================
+   FORM OPTIONS
+   ============================================ */
+
+.signin__options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: var(--space-4) 0;
+  position: relative;
+  z-index: 2;
+}
+
+.signin__checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  color: var(--gray-700);
+  font-weight: var(--font-medium);
+  transition: color var(--transition-base);
+  user-select: none;
+  position: relative;
+}
+
+.signin__checkbox:hover {
+  color: var(--primary-600);
+}
+
+.signin__checkbox input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.signin__checkbox-custom {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  background: white;
+  position: relative;
+  transition: all var(--transition-base);
+}
+
+.signin__checkbox input:checked + .signin__checkbox-custom {
+  background: var(--gradient-primary);
+  border-color: var(--primary-500);
+}
+
+.signin__checkbox input:checked + .signin__checkbox-custom::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.signin__checkbox:hover .signin__checkbox-custom {
+  border-color: var(--primary-500);
+  transform: scale(1.1);
+}
+
+.signin__link {
+  background: none;
+  border: none;
+  color: var(--primary-600);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+  transition: all var(--transition-base);
+  position: relative;
+}
+
+.signin__link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--gradient-primary);
+  transition: width var(--transition-base);
+}
+
+.signin__link:hover::after {
+  width: 100%;
+}
+
+.signin__link:hover {
+  color: var(--primary-700);
+  transform: translateX(2px);
+}
+
+.signin__link--primary {
+  font-size: var(--text-base);
+  font-weight: var(--font-bold);
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================
+   BUTTON STYLES
+   ============================================ */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-family: var(--font-family-base);
+  font-weight: var(--font-semibold);
+  text-align: center;
+  text-decoration: none;
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+.button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width var(--transition-medium), height var(--transition-medium);
+}
+
+.button:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+.button--primary {
+  background: var(--gradient-primary);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: var(--shadow-md);
+  background-size: 200% 200%;
+  animation: gradientShift 5s ease infinite;
+}
+
+.button--primary:hover:not(.button--disabled) {
+  background: var(--gradient-primary-hover);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-primary), var(--shadow-lg);
+}
+
+.button--hovered {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: var(--shadow-primary), var(--shadow-xl);
+}
+
+.button--medium {
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--text-base);
+  min-height: 48px;
+}
+
+.button--full-width {
+  width: 100%;
+}
+
+.button--disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+  box-shadow: none !important;
+}
+
+.button--loading {
+  cursor: wait;
+  position: relative;
+}
+
+.button__spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.spinner {
+  display: flex;
+  gap: 2px;
+}
+
+.spinner__circle {
+  width: 6px;
+  height: 6px;
+  background: white;
+  border-radius: 50%;
+  animation: bounce 1.4s ease-in-out infinite both;
+}
+
+.spinner__circle:nth-child(1) { animation-delay: -0.32s; }
+.spinner__circle:nth-child(2) { animation-delay: -0.16s; }
+.spinner__circle:nth-child(3) { animation-delay: 0s; }
+
+.button__text--loading {
+  opacity: 0.7;
+}
+
+.button__ripple {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.button:hover .button__ripple {
+  opacity: 1;
+  animation: ripple 0.6s ease-out;
+}
+
+/* ============================================
+   SOCIAL BUTTON STYLES
+   ============================================ */
+
+.social-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-6);
+  font-family: var(--font-family-base);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  background-color: #ffffff;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  min-height: 48px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.social-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: var(--gradient-shine);
+  transition: left var(--transition-slow);
+}
+
+.social-button:hover:not(.social-button--disabled)::before {
+  left: 100%;
+}
+
+.social-button:hover:not(.social-button--disabled) {
+  border-color: var(--gray-300);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.social-button--hovered {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: var(--shadow-lg);
+}
+
+.social-button--google {
+  color: var(--gray-700);
+  position: relative;
+}
+
+.social-button--google:hover:not(.social-button--disabled) {
+  background: linear-gradient(135deg, #f7fafc 0%, #ffffff 100%);
+  border-color: #4285F4;
+  box-shadow: 0 4px 12px rgba(66, 133, 244, 0.2), var(--shadow-md);
+}
+
+.social-button--linkedin {
+  color: #0077B5;
+  position: relative;
+}
+
+.social-button--linkedin:hover:not(.social-button--disabled) {
+  background: linear-gradient(135deg, #f0f8ff 0%, #ffffff 100%);
+  border-color: #0077B5;
+  box-shadow: 0 4px 12px rgba(0, 119, 181, 0.2), var(--shadow-md);
+}
+
+.social-button__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform var(--transition-base);
+  z-index: 1;
+}
+
+.social-button:hover .social-button__icon {
+  transform: scale(1.15) rotate(5deg);
+}
+
+.social-button__text {
+  flex: 1;
+  text-align: center;
+  z-index: 1;
+  transition: letter-spacing var(--transition-base);
+}
+
+.social-button:hover .social-button__text {
+  letter-spacing: 0.3px;
+}
+
+.social-button__ripple {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width var(--transition-medium), height var(--transition-medium);
+}
+
+.social-button:active .social-button__ripple {
+  width: 300px;
+  height: 300px;
+}
+
+.social-button--disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+  box-shadow: none;
+}
+
+/* ============================================
+   CARD FOOTER
+   ============================================ */
+
+.signin__footer {
+  text-align: center;
+  margin-top: var(--space-6);
+  padding-top: var(--space-6);
+  border-top: 2px solid var(--gray-100);
+  position: relative;
+  z-index: 2;
+}
+
+.signin__footer p {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--gray-600);
+  font-weight: var(--font-medium);
+}
+
+/* ============================================
+   PAGE FOOTER
+   ============================================ */
+
+.signin__page-footer {
+  text-align: center;
+  color: var(--gray-500);
+  font-size: var(--text-sm);
+  animation: fadeIn 1.5s var(--ease-out);
+  font-weight: var(--font-medium);
+  position: relative;
+  z-index: 2;
+}
+
+.signin__page-footer p {
+  margin: 0;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes expandWidth {
+  from {
+    width: 0;
+  }
+  to {
+    width: 80px;
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes bounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 768px) {
+  .signin {
+    padding: var(--space-4) var(--space-3);
+  }
+
+  .signin__container {
+    gap: var(--space-6);
+  }
+
+  .signin__card {
+    padding: var(--space-8) var(--space-6);
+  }
+
+  .signin__title {
+    font-size: var(--text-3xl);
+  }
+
+  .signin__subtitle {
+    font-size: var(--text-sm);
+  }
+
+  .signin__card-header h2 {
+    font-size: var(--text-xl);
+  }
+
+  .signin__options {
+    flex-direction: column;
+    gap: var(--space-3);
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .signin {
+    padding: var(--space-3) var(--space-2);
+  }
+
+  .signin__card {
+    padding: var(--space-6) var(--space-4);
+    border-radius: var(--radius-xl);
+  }
+
+  .signin__title {
+    font-size: var(--text-2xl);
+  }
+
+  .signin__card-header h2 {
+    font-size: var(--text-lg);
+  }
+}
+
+/* ============================================
+   ACCESSIBILITY & PERFORMANCE
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .signin__background-layer,
+  .signin__particle,
+  .signin__logo,
+  .signin__title,
+  .signin__container,
+  .signin__card,
+  .signin__header,
+  .signin__subtitle {
+    animation: none !important;
+  }
+  
+  .signin__card:hover,
+  .button:hover,
+  .social-button:hover {
+    transform: none !important;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .signin {
+    background: linear-gradient(135deg, var(--gray-900) 0%, var(--gray-800) 100%);
+  }
+  
+  .signin__card {
+    background: rgba(26, 32, 44, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .signin__card-header h2 {
+    color: var(--gray-100);
+  }
+
+  .signin__card-header p {
+    color: var(--gray-400);
+  }
+
+  .signin__footer p {
+    color: var(--gray-400);
+  }
+
+  .signin__divider span {
+    color: var(--gray-400);
+  }
+
+  .signin__divider-line {
+    background: linear-gradient(90deg, transparent 0%, var(--gray-700) 50%, transparent 100%);
+  }
+
+  .signin__footer {
+    border-top-color: var(--gray-700);
+  }
+  
+  .signin__checkbox {
+    color: var(--gray-300);
+  }
+  
+  .signin__page-footer {
+    color: var(--gray-500);
+  }
+
+  .input__label {
+    background: var(--gray-800);
+  }
+}

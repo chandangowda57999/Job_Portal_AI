@@ -1,0 +1,281 @@
+/**
+ * Input Component Styles
+ * Enhanced with theme system and rich user interactions
+ */
+
+/* Input Container */
+.input {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+/* Label Styles */
+.input__label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--gray-700);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  transition: color var(--transition-base);
+}
+
+.input__required {
+  color: var(--error);
+  font-weight: var(--font-bold);
+}
+
+/* Input Field Container */
+.input__container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Input Field */
+.input__field {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-base);
+  font-family: var(--font-family-base);
+  color: var(--gray-800);
+  background-color: #ffffff;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+  outline: none;
+}
+
+.input__field::placeholder {
+  color: var(--gray-400);
+  transition: color var(--transition-base);
+}
+
+.input__field:hover:not(:disabled):not(.input__field--error) {
+  border-color: var(--gray-300);
+  box-shadow: var(--shadow-sm);
+}
+
+.input__field:focus {
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15), var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.input__field:focus::placeholder {
+  color: var(--gray-500);
+}
+
+/* Input with Icon */
+.input__field--with-icon {
+  padding-left: 2.75rem;
+}
+
+.input__icon {
+  position: absolute;
+  left: var(--space-4);
+  color: var(--gray-500);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  transition: color var(--transition-base);
+}
+
+.input__field:focus + .input__icon {
+  color: var(--primary-500);
+}
+
+/* Input States */
+.input__field--error {
+  border-color: var(--error);
+  background-color: var(--error-light);
+  background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%);
+}
+
+.input__field--error:focus {
+  border-color: var(--error-dark);
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.15), var(--shadow-sm);
+}
+
+.input__field--disabled {
+  background-color: var(--gray-50);
+  color: var(--gray-400);
+  cursor: not-allowed;
+  opacity: 0.7;
+  border-color: var(--gray-200);
+}
+
+/* Password Toggle Button */
+.input__toggle-password {
+  position: absolute;
+  right: var(--space-3);
+  background: none;
+  border: none;
+  color: var(--gray-500);
+  cursor: pointer;
+  padding: var(--space-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-base);
+  border-radius: var(--radius-sm);
+}
+
+.input__toggle-password:hover {
+  color: var(--primary-600);
+  background-color: var(--primary-50);
+  transform: scale(1.1);
+}
+
+.input__toggle-password:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3);
+}
+
+.input__toggle-password:active {
+  transform: scale(0.95);
+}
+
+/* When input has password toggle, adjust padding */
+.input__field[type="password"],
+.input__field[type="text"]:has(+ .input__toggle-password) {
+  padding-right: 3rem;
+}
+
+/* Error Message */
+.input__error {
+  font-size: var(--text-sm);
+  color: var(--error-dark);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--font-medium);
+  animation: slideDown var(--transition-base) var(--ease-out);
+}
+
+.input__error::before {
+  content: "⚠";
+  font-size: var(--text-base);
+  animation: pulse 2s infinite;
+}
+
+/* Success State (Optional) */
+.input__field--success {
+  border-color: var(--success);
+  background: linear-gradient(135deg, #f0fff4 0%, #ffffff 100%);
+}
+
+.input__field--success:focus {
+  box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.15), var(--shadow-sm);
+}
+
+/* Floating Label Effect (Optional Enhancement) */
+.input--floating .input__label {
+  position: absolute;
+  top: 50%;
+  left: var(--space-4);
+  transform: translateY(-50%);
+  pointer-events: none;
+  transition: all var(--transition-base);
+  background: white;
+  padding: 0 var(--space-1);
+}
+
+.input--floating .input__field:focus ~ .input__label,
+.input--floating .input__field:not(:placeholder-shown) ~ .input__label {
+  top: 0;
+  font-size: var(--text-xs);
+  color: var(--primary-600);
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 768px) {
+  .input__field {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: var(--space-3) var(--space-3);
+  }
+
+  .input__label {
+    font-size: var(--text-xs);
+  }
+
+  .input__error {
+    font-size: var(--text-xs);
+  }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .input__field {
+    border-width: 3px;
+  }
+  
+  .input__field:focus {
+    outline: 3px solid;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .input__label {
+    color: var(--gray-300);
+  }
+  
+  .input__field {
+    background-color: var(--gray-700);
+    border-color: var(--gray-600);
+    color: var(--gray-100);
+  }
+  
+  .input__field::placeholder {
+    color: var(--gray-500);
+  }
+  
+  .input__field:hover:not(:disabled):not(.input__field--error) {
+    border-color: var(--gray-500);
+  }
+  
+  .input__field:focus {
+    border-color: var(--primary-500);
+    background-color: var(--gray-600);
+  }
+  
+  .input__field--disabled {
+    background-color: var(--gray-800);
+    color: var(--gray-500);
+  }
+  
+  .input__toggle-password {
+    color: var(--gray-400);
+  }
+  
+  .input__toggle-password:hover {
+    color: var(--primary-400);
+    background-color: var(--gray-600);
+  }
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
