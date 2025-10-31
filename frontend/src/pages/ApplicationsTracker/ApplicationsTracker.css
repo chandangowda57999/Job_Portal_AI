@@ -1,0 +1,56 @@
+.apps {
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--space-8) var(--space-4);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--primary-50) 0%, var(--secondary-50) 100%);
+}
+
+.apps__background { position: fixed; inset: 0; z-index: 0; }
+.apps__background-layer { position: absolute; inset: 0; border-radius: 50%; }
+.apps__background-layer--1 { background: var(--gradient-primary); opacity: 0.07; animation: gradientShift 20s ease infinite; background-size: 200% 200%; transform: scale(1.2); }
+.apps__background-layer--2 { background: linear-gradient(45deg, var(--secondary-500) 0%, var(--primary-500) 100%); opacity: 0.06; animation: gradientShift 25s ease infinite reverse; background-size: 300% 300%; transform: scale(1.4) rotate(30deg); }
+.apps__background-layer--3 { background: radial-gradient(circle, var(--primary-400) 0%, transparent 70%); opacity: 0.05; animation: float 15s ease-in-out infinite; transform: scale(1.8); }
+
+.apps__container { position: relative; z-index: 2; width: 100%; max-width: 1100px; display: flex; flex-direction: column; gap: var(--space-6); }
+
+.apps__header { text-align: left; }
+.apps__subtitle { color: var(--gray-600); margin-top: var(--space-2); }
+
+.apps__controls { display: grid; gap: var(--space-4); background: rgba(255,255,255,0.95); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.8); }
+.apps__search { display: flex; }
+.apps__input { width: 100%; padding: var(--space-3) var(--space-4); border: 2px solid var(--gray-200); border-radius: var(--radius-md); font-size: var(--text-base); }
+.apps__input:focus { border-color: var(--primary-500); box-shadow: 0 0 0 3px rgba(102,126,234,0.15); outline: none; }
+
+.apps__filters { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+.apps__filters select { padding: var(--space-3) var(--space-4); border: 2px solid var(--gray-200); border-radius: var(--radius-md); background: white; font-weight: var(--font-semibold); }
+.apps__filters select:focus { border-color: var(--primary-400); outline: none; box-shadow: 0 0 0 3px rgba(102,126,234,0.12); }
+
+.apps__pipeline { background: rgba(255,255,255,0.95); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.8); }
+.apps__stages { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-3); }
+.apps__stage { background: white; border: 2px solid var(--gray-100); border-radius: var(--radius-md); padding: var(--space-4); text-align: center; font-weight: var(--font-semibold); color: var(--gray-700); }
+.apps__stage-name { }
+
+.apps__list { display: grid; gap: var(--space-4); }
+.apps__item { display: grid; grid-template-columns: 1fr auto; gap: var(--space-4); align-items: center; }
+.apps__item-title { font-weight: var(--font-bold); }
+.apps__item-sub { color: var(--gray-600); margin-top: 4px; }
+.apps__item-status { display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-3); }
+.apps__progress { width: 160px; height: 10px; background: var(--gray-100); border-radius: var(--radius-full); overflow: hidden; }
+.apps__progress-fill { height: 100%; background: var(--gradient-primary); }
+.apps__status-badge { background: var(--gray-100); color: var(--gray-700); padding: 4px 10px; border-radius: var(--radius-full); font-size: var(--text-sm); font-weight: var(--font-semibold); }
+
+.apps__item-actions { display: flex; gap: var(--space-3); }
+.apps__btn { background: white; border: 2px solid var(--gray-200); border-radius: var(--radius-md); padding: var(--space-2) var(--space-4); font-weight: var(--font-semibold); }
+.apps__btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.apps__btn--primary { background: var(--gradient-primary); color: white; border: none; box-shadow: var(--shadow-primary); }
+.apps__btn--primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-xl); }
+
+@media (max-width: 768px) { .apps__item { grid-template-columns: 1fr; } .apps__progress { width: 100%; } }
+
+@media (prefers-color-scheme: dark) { .apps { background: linear-gradient(135deg, var(--gray-900) 0%, var(--gray-800) 100%); } }
+
+

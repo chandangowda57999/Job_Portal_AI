@@ -1,0 +1,24 @@
+.signup { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: var(--space-8) var(--space-4); position: relative; overflow: hidden; background: linear-gradient(135deg, var(--primary-50) 0%, var(--secondary-50) 100%); }
+.signup__background { position: fixed; inset: 0; z-index: 0; }
+.signup__bg { position: absolute; inset: 0; border-radius: 50%; }
+.signup__bg--1 { background: var(--gradient-primary); opacity: .07; animation: gradientShift 20s ease infinite; background-size: 200% 200%; transform: scale(1.2); }
+.signup__bg--2 { background: linear-gradient(45deg, var(--secondary-500) 0%, var(--primary-500) 100%); opacity: .06; animation: gradientShift 25s ease infinite reverse; background-size: 300% 300%; transform: scale(1.4) rotate(30deg); }
+.signup__bg--3 { background: radial-gradient(circle, var(--primary-400) 0%, transparent 70%); opacity: .05; animation: float 15s ease-in-out infinite; transform: scale(1.8); }
+.signup__container { position: relative; z-index: 2; width: 100%; max-width: 520px; display: grid; gap: var(--space-6); }
+.signup__header { text-align: center; display: grid; gap: var(--space-2); }
+.signup__title { font-size: var(--text-3xl); font-weight: var(--font-bold); margin: 0; }
+.signup__title-text { background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: gradientShift 5s ease infinite; }
+.signup__subtitle { color: var(--gray-600); }
+.signup__card { background: rgba(255,255,255,0.95); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-radius: var(--radius-2xl); padding: var(--space-8); box-shadow: var(--shadow-2xl); border: 1px solid rgba(255,255,255,0.8); position: relative; overflow: hidden; }
+.signup__card--loading { pointer-events: none; opacity: .9; }
+.signup__error { padding: var(--space-3); color: var(--error-dark); background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%); border: 1px solid var(--error-light); border-radius: var(--radius-md); margin-bottom: var(--space-4); }
+.signup__social { display: grid; gap: var(--space-3); }
+.signup__divider { display: flex; align-items: center; gap: var(--space-2); margin: var(--space-4) 0; }
+.signup__divider-line { flex: 1; height: 2px; background: linear-gradient(90deg, transparent 0%, var(--gray-200) 50%, transparent 100%); }
+.signup__form { display: grid; gap: var(--space-5); }
+.signup__footer { text-align: center; margin-top: var(--space-4); border-top: 2px solid var(--gray-100); padding-top: var(--space-4); }
+.signup__page-footer { text-align: center; color: var(--gray-500); }
+
+@media (max-width: 480px) { .signup__card { padding: var(--space-6) var(--space-4); } }
+
+

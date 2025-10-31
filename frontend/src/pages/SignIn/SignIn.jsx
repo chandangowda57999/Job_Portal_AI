@@ -161,7 +161,7 @@ const SignIn = () => {
    * Navigates to the sign-up page
    */
   const handleSignUpClick = () => {
-    alert('Sign up functionality coming soon!');
+    navigate('/signup');
   };
 
   /**

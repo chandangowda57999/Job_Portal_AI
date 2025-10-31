@@ -1,0 +1,37 @@
+.dash { min-height: 100vh; display: flex; justify-content: center; padding: var(--space-8) var(--space-4); position: relative; background: linear-gradient(135deg, var(--primary-50) 0%, var(--secondary-50) 100%); }
+.dash__background { position: fixed; inset: 0; z-index: 0; }
+.dash__bg-layer { position: absolute; inset: 0; border-radius: 50%; }
+.dash__bg-layer--1 { background: var(--gradient-primary); opacity: .07; animation: gradientShift 20s ease infinite; background-size: 200% 200%; transform: scale(1.2); }
+.dash__bg-layer--2 { background: linear-gradient(45deg, var(--secondary-500) 0%, var(--primary-500) 100%); opacity: .06; animation: gradientShift 25s ease infinite reverse; background-size: 300% 300%; transform: scale(1.4) rotate(30deg); }
+.dash__bg-layer--3 { background: radial-gradient(circle, var(--primary-400) 0%, transparent 70%); opacity: .05; animation: float 15s ease-in-out infinite; transform: scale(1.8); }
+.dash__container { position: relative; z-index: 2; width: 100%; max-width: 1100px; display: grid; gap: var(--space-6); }
+
+.dash__row { display: grid; gap: var(--space-4); }
+.dash__stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); }
+.dash__stat { background: white; border: 2px solid var(--gray-100); border-radius: var(--radius-xl); padding: var(--space-6); text-align: center; box-shadow: var(--shadow-sm); }
+.dash__stat-label { color: var(--gray-600); margin-top: var(--space-2); }
+.dash__cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); }
+.dash__cards--stack { grid-template-columns: 1fr; }
+.dash__card { background: white; border: 2px solid var(--gray-100); border-radius: var(--radius-xl); padding: var(--space-5); box-shadow: var(--shadow-sm); display: grid; gap: var(--space-2); min-width: auto; }
+.dash__card-fit { background: var(--gradient-success); color: white; padding: 2px 8px; border-radius: var(--radius-full); justify-self: start; box-shadow: var(--shadow-success); font-size: var(--text-sm); }
+.dash__meta { display: flex; flex-wrap: wrap; gap: var(--space-2); color: var(--gray-600); font-size: var(--text-sm); }
+.dash__tags { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.dash__tag { background: var(--gray-100); color: var(--gray-700); padding: 2px 8px; border-radius: var(--radius-full); font-size: var(--text-sm); font-weight: var(--font-semibold); }
+.dash__tag--fit { background: var(--primary-100); color: var(--primary-700); }
+.dash__section { background: rgba(255,255,255,0.95); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.8); border-radius: var(--radius-2xl); padding: var(--space-6); box-shadow: var(--shadow-md); }
+.dash__section--compact { padding: var(--space-4); }
+.rectabs { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.rectabs__tab { background: white; border: 2px solid var(--gray-200); border-radius: var(--radius-full); padding: 6px 10px; display: inline-flex; align-items: center; gap: 8px; font-weight: var(--font-semibold); color: var(--gray-700); }
+.rectabs__tab--active { border-color: var(--primary-400); box-shadow: var(--shadow-primary); }
+.rectabs__count { background: var(--gray-100); color: var(--gray-700); border-radius: var(--radius-full); padding: 2px 8px; font-size: var(--text-sm); }
+.dash__section-title { font-weight: var(--font-bold); margin-bottom: var(--space-4); }
+.dash__apps { display: grid; gap: var(--space-3); }
+.dash__app { display: grid; grid-template-columns: 1fr auto; gap: var(--space-3); align-items: center; background: white; border: 2px solid var(--gray-100); border-radius: var(--radius-xl); padding: var(--space-4); }
+.dash__app-sub { color: var(--gray-600); margin-top: 4px; }
+.dash__btn { background: white; border: 2px solid var(--gray-200); border-radius: var(--radius-md); padding: var(--space-2) var(--space-4); font-weight: var(--font-semibold); }
+.dash__btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+@media (max-width: 1024px) { .dash__stats { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .dash__stats { grid-template-columns: 1fr; } .dash__app { grid-template-columns: 1fr; } }
+
+
