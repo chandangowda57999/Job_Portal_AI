@@ -7,6 +7,15 @@ import {
   STORAGE_KEYS,
   UI_CONSTANTS
 } from '../utils/constants';
+import { appConfig, shouldUseMockMode } from '../config/appConfig';
+import {
+  findMockUserByEmail,
+  createMockUser,
+  updateMockUserProfile,
+  authenticateMockUser,
+  getMockToken,
+  printTestCredentials,
+} from './mockUsers';
 
 /**
  * Authentication Service
@@ -115,8 +124,62 @@ export const isAuthenticated = () => {
 };
 
 /**
+ * Mock login using mock users database (for testing without backend)
+ * Checks mock users database and local storage for user authentication
+ * 
+ * @param {Object} credentials - Login credentials
+ * @param {string} credentials.email - User's email address
+ * @param {string} credentials.password - User's password
+ * @returns {Promise<Object>} Promise resolving to user data and mock token
+ * @throws {Error} If user not found or credentials invalid
+ */
+const mockLogin = async ({ email, password }) => {
+  // First, check mock users database for predefined test users
+  const mockUser = authenticateMockUser(email, password);
+  
+  if (mockUser) {
+    // User found in mock database
+    const mockToken = getMockToken(mockUser.id);
+    setAuthToken(mockToken);
+    setUserData(mockUser);
+    
+    console.log('🔧 Mock Mode: User logged in from mock database');
+    console.log(`   Email: ${mockUser.email}`);
+    console.log(`   Profile Complete: ${mockUser.profileComplete ? 'Yes' : 'No'}`);
+    
+    return {
+      success: true,
+      message: UI_CONSTANTS.SUCCESS_MESSAGES.LOGIN,
+      user: mockUser,
+      token: mockToken,
+    };
+  }
+  
+  // Fallback: Check local storage for newly created users
+  const storedUser = getUserData();
+  
+  if (storedUser && storedUser.email.toLowerCase() === email.toLowerCase()) {
+    // User found in local storage (from previous signup)
+    const mockToken = getAuthToken() || getMockToken(storedUser.id);
+    setAuthToken(mockToken);
+    
+    console.log('🔧 Mock Mode: User logged in from local storage');
+    
+    return {
+      success: true,
+      message: UI_CONSTANTS.SUCCESS_MESSAGES.LOGIN,
+      user: storedUser,
+      token: mockToken,
+    };
+  }
+  
+  throw new Error('Invalid email or password. Use test credentials or sign up first.');
+};
+
+/**
  * Traditional email/password login
  * Sends credentials to backend and stores received token
+ * Falls back to mock mode if backend is unavailable
  * 
  * @param {Object} credentials - Login credentials
  * @param {string} credentials.email - User's email address
@@ -157,6 +220,16 @@ export const login = async ({ email, password, rememberMe = false }) => {
       token,
     };
   } catch (error) {
+    // Check if mock mode should be used (only if enabled in config)
+    if (shouldUseMockMode(error)) {
+      console.warn('⚠️ Backend unavailable, using mock mode for login');
+      const result = await mockLogin({ email, password });
+      if (rememberMe) {
+        localStorage.setItem(STORAGE_KEYS.REMEMBER_ME, 'true');
+      }
+      return result;
+    }
+    // If mock mode is disabled or it's a real API error, throw the error
     throw new Error(
       error.response?.data?.message ||
       UI_CONSTANTS.ERROR_MESSAGES.INVALID_CREDENTIALS
@@ -165,8 +238,49 @@ export const login = async ({ email, password, rememberMe = false }) => {
 };
 
 /**
+ * Mock registration using mock users database (for testing without backend)
+ * Creates a new user account in mock database and local storage
+ * 
+ * @param {Object} userData - Registration data
+ * @param {string} userData.email - User's email address
+ * @param {string} userData.name - User's full name
+ * @param {string} userData.password - User's password
+ * @returns {Promise<Object>} Promise resolving to user data and mock token
+ * @throws {Error} If email already exists
+ */
+const mockRegister = async (userData) => {
+  // Check if user already exists
+  const existingUser = findMockUserByEmail(userData.email);
+  
+  if (existingUser) {
+    throw new Error('Email already registered. Please sign in instead.');
+  }
+  
+  // Create new user in mock database
+  const user = createMockUser(userData);
+  const mockToken = getMockToken(user.id);
+  
+  // Store in local storage for persistence
+  setAuthToken(mockToken);
+  setUserData(user);
+
+  console.log('🔧 Mock Mode: New user registered');
+  console.log(`   Email: ${user.email}`);
+  console.log(`   Name: ${user.name}`);
+  console.log(`   Profile Status: Incomplete (will redirect to profile creation)`);
+
+  return {
+    success: true,
+    message: UI_CONSTANTS.SUCCESS_MESSAGES.REGISTER,
+    user,
+    token: mockToken,
+  };
+};
+
+/**
  * User registration
  * Creates a new user account with provided credentials
+ * Falls back to mock mode if backend is unavailable
  * 
  * @param {Object} userData - Registration data
  * @param {string} userData.email - User's email address
@@ -203,6 +317,12 @@ export const register = async (userData) => {
       token,
     };
   } catch (error) {
+    // Check if mock mode should be used (only if enabled in config)
+    if (shouldUseMockMode(error)) {
+      console.warn('⚠️ Backend unavailable, using mock mode for registration');
+      return await mockRegister(userData);
+    }
+    // If mock mode is disabled or it's a real API error, throw the error
     throw new Error(
       error.response?.data?.message ||
       UI_CONSTANTS.ERROR_MESSAGES.SERVER_ERROR
@@ -385,6 +505,24 @@ export const getUserProfile = async () => {
       'Failed to fetch user profile'
     );
   }
+};
+
+/**
+ * Checks if user profile is complete
+ * Profile is considered complete if firstName, lastName, and userType are set
+ * 
+ * @param {Object} user - User object from storage or API
+ * @returns {boolean} True if profile is complete, false otherwise
+ */
+export const isProfileComplete = (user) => {
+  if (!user) return false;
+  
+  // Check if required profile fields exist
+  const hasFirstName = user.firstName && user.firstName.trim().length > 0;
+  const hasLastName = user.lastName && user.lastName.trim().length > 0;
+  const hasUserType = user.userType && user.userType.trim().length > 0;
+  
+  return hasFirstName && hasLastName && hasUserType;
 };
 
 /**

@@ -37,7 +37,8 @@ function SignUp() {
     try {
       const res = await register({ name: formData.name, email: formData.email, password: formData.password })
       console.log('Registered:', res.user)
-      navigate('/dashboard')
+      // Redirect to profile creation after successful registration
+      navigate('/profile/create')
     } catch (err) {
       setGeneralError(err.message || 'Failed to sign up. Please try again.')
     } finally {
