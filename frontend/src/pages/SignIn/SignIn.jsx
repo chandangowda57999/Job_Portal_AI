@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login, initiateGoogleLogin, initiateLinkedInLogin } from '../../services/authService';
+import { login, initiateGoogleLogin, initiateLinkedInLogin, isProfileComplete, getUserData } from '../../services/authService';
 import { validateSignInForm, sanitizeInput } from '../../utils/validators';
+import { printTestCredentials } from '../../services/mockUsers';
+import { appConfig } from '../../config/appConfig';
+import TestCredentials from '../../components/TestCredentials/TestCredentials';
 import './SignIn.css';
 
 /**
@@ -38,6 +41,16 @@ const SignIn = () => {
   const [generalError, setGeneralError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [hoveredElement, setHoveredElement] = useState(null);
+
+  /**
+   * Print test credentials to console on component mount
+   * Only in development mode and when mock mode is enabled
+   */
+  useEffect(() => {
+    if (appConfig.PRINT_TEST_CREDENTIALS) {
+      printTestCredentials();
+    }
+  }, []);
 
   /**
    * Handles input field changes with smooth validation
@@ -118,9 +131,18 @@ const SignIn = () => {
         rememberMe,
       });
 
-      // Success - redirect to dashboard or home
+      // Success - check if profile is complete and redirect accordingly
       console.log('Login successful:', response.message);
-      alert('Login successful! Welcome back.');
+      
+      // Check if user profile is complete
+      const user = getUserData();
+      if (isProfileComplete(user)) {
+        // Profile complete - redirect to dashboard
+        navigate('/dashboard');
+      } else {
+        // Profile incomplete - redirect to profile creation
+        navigate('/profile/create');
+      }
       
     } catch (error) {
       // Handle login error
@@ -471,6 +493,9 @@ const SignIn = () => {
           <p>&copy; 2025 JobPortal AI. All rights reserved.</p>
         </div>
       </div>
+
+      {/* Test Credentials Component (Development Only, when mock mode enabled) */}
+      {appConfig.SHOW_TEST_CREDENTIALS && <TestCredentials />}
     </div>
   );
 };

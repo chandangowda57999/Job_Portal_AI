@@ -1,11 +1,19 @@
 /**
  * Application-wide constants
  * Centralized configuration for API endpoints, OAuth URLs, and validation rules
+ * 
+ * NOTE: When transitioning from mock mode to real database:
+ * - Update VITE_API_BASE_URL in .env file to point to your backend
+ * - Example: VITE_API_BASE_URL=http://localhost:8080/api
+ * - This constant automatically uses the environment variable
  */
 
 /**
  * API Base URL from environment variables
  * Falls back to localhost if not configured
+ * 
+ * To configure: Set VITE_API_BASE_URL in .env file
+ * Example: VITE_API_BASE_URL=http://localhost:8080/api
  */
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 

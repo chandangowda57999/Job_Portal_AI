@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import SignIn from './pages/SignIn/SignIn'
 import SignUp from './pages/SignUp/SignUp'
+import ProfileCreation from './pages/ProfileCreation/ProfileCreation'
 import JobDetail from './pages/JobDetail/JobDetail'
 import ApplicationsTracker from './pages/ApplicationsTracker/ApplicationsTracker'
 import Dashboard from './pages/Dashboard/Dashboard'
@@ -23,6 +24,8 @@ function App() {
           <Route path="/signin" element={<SignIn />} />
           {/* Sign Up Route */}
           <Route path="/signup" element={<SignUp />} />
+          {/* Profile Creation Route - After signup or incomplete profile */}
+          <Route path="/profile/create" element={<ProfileCreation />} />
           {/* Job Detail */}
           <Route path="/jobs/:jobId" element={<JobDetail />} />
           {/* Applications Tracker */}
