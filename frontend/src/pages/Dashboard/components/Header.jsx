@@ -1,13 +1,22 @@
-import React, { useState } from 'react'
+import React from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAppDispatch, useAppSelector } from '../../../store/hooks'
+import { setSearchQuery } from '../../../store/slices/dashboardSlice'
 
 /**
  * Header
  * Dashboard top bar: logo/title, search box, and profile placeholder.
- *
- * @param {{ onSearch: (q: string) => void }} props
+ * Uses Redux for search query state.
  */
-function Header({ onSearch }) {
-  const [q, setQ] = useState('')
+function Header() {
+  const navigate = useNavigate()
+  const dispatch = useAppDispatch()
+  const { searchQuery } = useAppSelector((state) => state.dashboard)
+
+  const handleSearch = () => {
+    navigate(`/search?q=${encodeURIComponent(searchQuery)}`)
+  }
+
   return (
     <div className="dash__section">
       <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '1rem', alignItems: 'center' }}>
@@ -17,12 +26,13 @@ function Header({ onSearch }) {
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
+              value={searchQuery}
+              onChange={(e) => dispatch(setSearchQuery(e.target.value))}
               className="apps__input"
               placeholder="Search jobs, skills, or location..."
+              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
             />
-            <button className="button button--primary button--medium" onClick={() => onSearch(q)}>Search</button>
+            <button className="button button--primary button--medium" onClick={handleSearch}>Search</button>
           </div>
         </div>
         <div className="hidden-mobile" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>

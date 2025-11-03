@@ -1,5 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import {
+  updateSignInField,
+  setSignInErrors,
+  setSignInGeneralError,
+  setSignInLoading,
+  resetSignInForm,
+  setUser,
+  setToken,
+} from '../../store/slices/authSlice';
 import { login, initiateGoogleLogin, initiateLinkedInLogin, isProfileComplete, getUserData } from '../../services/authService';
 import { validateSignInForm, sanitizeInput } from '../../utils/validators';
 import { printTestCredentials } from '../../services/mockUsers';
@@ -27,20 +37,16 @@ import './SignIn.css';
  */
 const SignIn = () => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { signInForm } = useAppSelector((state) => state.auth);
+  const [hoveredElement, setHoveredElement] = React.useState(null);
 
-  // Form state
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
-
-  // UI state
-  const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
-  const [generalError, setGeneralError] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [hoveredElement, setHoveredElement] = useState(null);
+  // Reset form on mount
+  useEffect(() => {
+    return () => {
+      dispatch(resetSignInForm());
+    };
+  }, [dispatch]);
 
   /**
    * Print test credentials to console on component mount
@@ -60,27 +66,8 @@ const SignIn = () => {
    */
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
-    // Sanitize input before storing
     const sanitizedValue = sanitizeInput(value);
-    
-    setFormData((prev) => ({
-      ...prev,
-      [name]: sanitizedValue,
-    }));
-
-    // Clear error for this field when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: '',
-      }));
-    }
-
-    // Clear general error when user starts making changes
-    if (generalError) {
-      setGeneralError('');
-    }
+    dispatch(updateSignInField({ field: name, value: sanitizedValue }));
   };
 
   /**
@@ -89,14 +76,14 @@ const SignIn = () => {
    * @param {Event} e - Checkbox change event
    */
   const handleRememberMeChange = (e) => {
-    setRememberMe(e.target.checked);
+    dispatch(updateSignInField({ field: 'rememberMe', value: e.target.checked }));
   };
 
   /**
    * Toggles password visibility with smooth animation
    */
   const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
+    dispatch(updateSignInField({ field: 'showPassword', value: !signInForm.showPassword }));
   };
 
   /**
@@ -109,32 +96,37 @@ const SignIn = () => {
     e.preventDefault();
     
     // Clear previous errors
-    setErrors({});
-    setGeneralError('');
+    dispatch(setSignInErrors({}));
+    dispatch(setSignInGeneralError(''));
 
     // Validate form data
+    const formData = {
+      email: signInForm.email,
+      password: signInForm.password,
+    };
     const validation = validateSignInForm(formData);
     
     if (!validation.isValid) {
-      setErrors(validation.errors);
+      dispatch(setSignInErrors(validation.errors));
       return;
     }
 
     // Set loading state
-    setIsLoading(true);
+    dispatch(setSignInLoading(true));
 
     try {
       // Attempt login
       const response = await login({
-        email: formData.email,
-        password: formData.password,
-        rememberMe,
+        email: signInForm.email,
+        password: signInForm.password,
+        rememberMe: signInForm.rememberMe,
       });
 
-      // Success - check if profile is complete and redirect accordingly
-      console.log('Login successful:', response.message);
-      
-      // Check if user profile is complete
+      // Store user and token in Redux
+      dispatch(setUser(response.user));
+      dispatch(setToken(response.token));
+
+      // Check if user profile is complete and redirect accordingly
       const user = getUserData();
       if (isProfileComplete(user)) {
         // Profile complete - redirect to dashboard
@@ -143,13 +135,12 @@ const SignIn = () => {
         // Profile incomplete - redirect to profile creation
         navigate('/profile/create');
       }
-      
     } catch (error) {
       // Handle login error
-      setGeneralError(error.message || 'Failed to sign in. Please try again.');
+      dispatch(setSignInGeneralError(error.message || 'Failed to sign in. Please try again.'));
       console.error('Login error:', error);
     } finally {
-      setIsLoading(false);
+      dispatch(setSignInLoading(false));
     }
   };
 
@@ -161,7 +152,7 @@ const SignIn = () => {
     try {
       initiateGoogleLogin();
     } catch (error) {
-      setGeneralError('Failed to initiate Google login. Please try again.');
+      dispatch(setSignInGeneralError('Failed to initiate Google login. Please try again.'));
       console.error('Google login error:', error);
     }
   };
@@ -174,7 +165,7 @@ const SignIn = () => {
     try {
       initiateLinkedInLogin();
     } catch (error) {
-      setGeneralError('Failed to initiate LinkedIn login. Please try again.');
+      dispatch(setSignInGeneralError('Failed to initiate LinkedIn login. Please try again.'));
       console.error('LinkedIn login error:', error);
     }
   };
@@ -243,7 +234,7 @@ const SignIn = () => {
 
         {/* Sign-in card with enhanced glass effect */}
         <div 
-          className={`signin__card ${isLoading ? 'signin__card--loading' : ''}`}
+          className={`signin__card ${signInForm.isLoading ? 'signin__card--loading' : ''}`}
           onMouseEnter={() => setHoveredElement('card')}
           onMouseLeave={() => setHoveredElement(null)}
         >
@@ -253,14 +244,14 @@ const SignIn = () => {
           </div>
 
           {/* General error message with shake animation */}
-          {generalError && (
+          {signInForm.generalError && (
             <div className="signin__error" role="alert">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <circle cx="12" cy="12" r="10" strokeWidth="2" />
                 <line x1="12" y1="8" x2="12" y2="12" strokeWidth="2" strokeLinecap="round" />
                 <line x1="12" y1="16" x2="12.01" y2="16" strokeWidth="2" strokeLinecap="round" />
               </svg>
-              <span>{generalError}</span>
+              <span>{signInForm.generalError}</span>
             </div>
           )}
 
@@ -271,7 +262,7 @@ const SignIn = () => {
               type="button"
               className={`social-button social-button--google ${hoveredElement === 'google' ? 'social-button--hovered' : ''}`}
               onClick={handleGoogleLogin}
-              disabled={isLoading}
+              disabled={signInForm.isLoading}
               aria-label="Sign in with Google"
               onMouseEnter={() => setHoveredElement('google')}
               onMouseLeave={() => setHoveredElement(null)}
@@ -305,7 +296,7 @@ const SignIn = () => {
               type="button"
               className={`social-button social-button--linkedin ${hoveredElement === 'linkedin' ? 'social-button--hovered' : ''}`}
               onClick={handleLinkedInLogin}
-              disabled={isLoading}
+              disabled={signInForm.isLoading}
               aria-label="Sign in with LinkedIn"
               onMouseEnter={() => setHoveredElement('linkedin')}
               onMouseLeave={() => setHoveredElement(null)}
@@ -336,15 +327,15 @@ const SignIn = () => {
                   id="email"
                   type="email"
                   name="email"
-                  value={formData.email}
+                  value={signInForm.email}
                   onChange={handleInputChange}
                   placeholder=" "
                   required
-                  disabled={isLoading}
+                  disabled={signInForm.isLoading}
                   autoComplete="email"
-                  className={`input__field ${errors.email ? 'input__field--error' : ''} ${hoveredElement === 'email' ? 'input__field--focused' : ''}`}
-                  aria-invalid={!!errors.email}
-                  aria-describedby={errors.email ? 'email-error' : undefined}
+                  className={`input__field ${signInForm.errors.email ? 'input__field--error' : ''} ${hoveredElement === 'email' ? 'input__field--focused' : ''}`}
+                  aria-invalid={!!signInForm.errors.email}
+                  aria-describedby={signInForm.errors.email ? 'email-error' : undefined}
                   onFocus={() => setHoveredElement('email')}
                   onBlur={() => setHoveredElement(null)}
                 />
@@ -354,14 +345,14 @@ const SignIn = () => {
                 </label>
                 <div className="input__focus-line"></div>
               </div>
-              {errors.email && (
+              {signInForm.errors.email && (
                 <p id="email-error" className="input__error" role="alert">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <circle cx="12" cy="12" r="10" strokeWidth="2" />
                     <line x1="12" y1="8" x2="12" y2="12" strokeWidth="2" strokeLinecap="round" />
                     <line x1="12" y1="16" x2="12.01" y2="16" strokeWidth="2" strokeLinecap="round" />
                   </svg>
-                  {errors.email}
+                  {signInForm.errors.email}
                 </p>
               )}
             </div>
@@ -371,17 +362,17 @@ const SignIn = () => {
               <div className="input__container">
                 <input
                   id="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={signInForm.showPassword ? 'text' : 'password'}
                   name="password"
-                  value={formData.password}
+                  value={signInForm.password}
                   onChange={handleInputChange}
                   placeholder=" "
                   required
-                  disabled={isLoading}
+                  disabled={signInForm.isLoading}
                   autoComplete="current-password"
-                  className={`input__field ${errors.password ? 'input__field--error' : ''} ${hoveredElement === 'password' ? 'input__field--focused' : ''}`}
-                  aria-invalid={!!errors.password}
-                  aria-describedby={errors.password ? 'password-error' : undefined}
+                  className={`input__field ${signInForm.errors.password ? 'input__field--error' : ''} ${hoveredElement === 'password' ? 'input__field--focused' : ''}`}
+                  aria-invalid={!!signInForm.errors.password}
+                  aria-describedby={signInForm.errors.password ? 'password-error' : undefined}
                   onFocus={() => setHoveredElement('password')}
                   onBlur={() => setHoveredElement(null)}
                 />
@@ -393,10 +384,10 @@ const SignIn = () => {
                   type="button"
                   className="input__toggle-password"
                   onClick={togglePasswordVisibility}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-label={signInForm.showPassword ? 'Hide password' : 'Show password'}
                   tabIndex={-1}
                 >
-                  {showPassword ? (
+                  {signInForm.showPassword ? (
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
                     </svg>
@@ -409,14 +400,14 @@ const SignIn = () => {
                 </button>
                 <div className="input__focus-line"></div>
               </div>
-              {errors.password && (
+              {signInForm.errors.password && (
                 <p id="password-error" className="input__error" role="alert">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <circle cx="12" cy="12" r="10" strokeWidth="2" />
                     <line x1="12" y1="8" x2="12" y2="12" strokeWidth="2" strokeLinecap="round" />
                     <line x1="12" y1="16" x2="12.01" y2="16" strokeWidth="2" strokeLinecap="round" />
                   </svg>
-                  {errors.password}
+                  {signInForm.errors.password}
                 </p>
               )}
             </div>
@@ -426,9 +417,9 @@ const SignIn = () => {
               <label className="signin__checkbox">
                 <input
                   type="checkbox"
-                  checked={rememberMe}
+                  checked={signInForm.rememberMe}
                   onChange={handleRememberMeChange}
-                  disabled={isLoading}
+                  disabled={signInForm.isLoading}
                 />
                 <span className="signin__checkbox-custom"></span>
                 <span>Remember me</span>
@@ -437,7 +428,7 @@ const SignIn = () => {
                 type="button"
                 className="signin__link"
                 onClick={handleForgotPasswordClick}
-                disabled={isLoading}
+                disabled={signInForm.isLoading}
                 onMouseEnter={() => setHoveredElement('forgot')}
                 onMouseLeave={() => setHoveredElement(null)}
               >
@@ -448,13 +439,13 @@ const SignIn = () => {
             {/* Enhanced submit button with loading animation */}
             <button
               type="submit"
-              className={`button button--primary button--medium button--full-width ${isLoading ? 'button--loading' : ''} ${hoveredElement === 'submit' ? 'button--hovered' : ''}`}
-              disabled={isLoading}
-              aria-busy={isLoading}
+              className={`button button--primary button--medium button--full-width ${signInForm.isLoading ? 'button--loading' : ''} ${hoveredElement === 'submit' ? 'button--hovered' : ''}`}
+              disabled={signInForm.isLoading}
+              aria-busy={signInForm.isLoading}
               onMouseEnter={() => setHoveredElement('submit')}
               onMouseLeave={() => setHoveredElement(null)}
             >
-              {isLoading && (
+              {signInForm.isLoading && (
                 <span className="button__spinner" aria-hidden="true">
                   <div className="spinner">
                     <div className="spinner__circle"></div>
@@ -463,8 +454,8 @@ const SignIn = () => {
                   </div>
                 </span>
               )}
-              <span className={isLoading ? 'button__text--loading' : 'button__text'}>
-                {isLoading ? 'Signing In...' : 'Sign In'}
+              <span className={signInForm.isLoading ? 'button__text--loading' : 'button__text'}>
+                {signInForm.isLoading ? 'Signing In...' : 'Sign In'}
               </span>
               <div className="button__ripple"></div>
             </button>
@@ -478,7 +469,7 @@ const SignIn = () => {
                 type="button"
                 className="signin__link signin__link--primary"
                 onClick={handleSignUpClick}
-                disabled={isLoading}
+                disabled={signInForm.isLoading}
                 onMouseEnter={() => setHoveredElement('signup')}
                 onMouseLeave={() => setHoveredElement(null)}
               >

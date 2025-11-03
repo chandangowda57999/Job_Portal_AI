@@ -1,24 +1,32 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { setApplications, setQuery, setFilters, setSort } from '../../store/slices/applicationsSlice'
 import './ApplicationsTracker.css'
 
 /**
  * Applications Tracker Page
  * Themed, filterable list with pipeline overview per WIREFRAMES.md
+ * Uses Redux for state management.
  */
 function ApplicationsTracker() {
   const navigate = useNavigate()
-  const [query, setQuery] = useState('')
-  const [filters, setFilters] = useState({ role: 'All', company: 'All', status: 'All' })
-  const [sort, setSort] = useState('Recent')
+  const dispatch = useAppDispatch()
+  const { applications, query, filters, sort, pipeline } = useAppSelector((state) => state.applications)
 
-  // Mock applications; replace with API
-  const applications = useMemo(() => ([
+  // Initialize mock data; replace with API later
+  const mockApplications = useMemo(() => ([
     { id: 'a1', role: 'Frontend Engineer', company: 'Acme Corp', appliedAt: 'Oct 20, 2025', status: 'Screening', jobId: '123' },
     { id: 'a2', role: 'Senior UI Engineer', company: 'Globex', appliedAt: 'Oct 18, 2025', status: 'Interview', jobId: '201' },
     { id: 'a3', role: 'Fullstack Developer', company: 'Initech', appliedAt: 'Oct 10, 2025', status: 'Applied', jobId: '301' },
     { id: 'a4', role: 'React Developer', company: 'Umbrella', appliedAt: 'Oct 05, 2025', status: 'Offer', jobId: '401' },
   ]), [])
+
+  useEffect(() => {
+    if (applications.length === 0) {
+      dispatch(setApplications(mockApplications))
+    }
+  }, [dispatch, applications.length, mockApplications])
 
   const companies = useMemo(() => ['All', ...Array.from(new Set(applications.map(a => a.company)))], [applications])
   const roles = useMemo(() => ['All', ...Array.from(new Set(applications.map(a => a.role)))], [applications])
@@ -29,8 +37,6 @@ function ApplicationsTracker() {
     .filter(a => (filters.status === 'All' ? true : a.status === filters.status))
     .filter(a => (query.trim() ? (a.role + ' ' + a.company).toLowerCase().includes(query.toLowerCase()) : true))
     .sort((a, b) => (sort === 'Recent' ? 0 : a.company.localeCompare(b.company)))
-
-  const pipeline = ['Applied', 'Screening', 'Interview', 'Offer', 'Hired']
 
   const statusIndex = (s) => pipeline.indexOf(s)
 
@@ -55,26 +61,26 @@ function ApplicationsTracker() {
               className="apps__input"
               placeholder="Search roles or companies..."
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => dispatch(setQuery(e.target.value))}
             />
           </div>
           <div className="apps__filters">
-            <select value={filters.role} onChange={(e) => setFilters({ ...filters, role: e.target.value })}>
+            <select value={filters.role} onChange={(e) => dispatch(setFilters({ role: e.target.value }))}>
               {roles.map(r => (
                 <option key={r} value={r}>{r}</option>
               ))}
             </select>
-            <select value={filters.company} onChange={(e) => setFilters({ ...filters, company: e.target.value })}>
+            <select value={filters.company} onChange={(e) => dispatch(setFilters({ company: e.target.value }))}>
               {companies.map(c => (
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
-            <select value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })}>
+            <select value={filters.status} onChange={(e) => dispatch(setFilters({ status: e.target.value }))}>
               {['All', ...pipeline].map(s => (
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>
-            <select value={sort} onChange={(e) => setSort(e.target.value)}>
+            <select value={sort} onChange={(e) => dispatch(setSort(e.target.value))}>
               {['Recent', 'Company A→Z'].map(s => (
                 <option key={s} value={s}>{s}</option>
               ))}

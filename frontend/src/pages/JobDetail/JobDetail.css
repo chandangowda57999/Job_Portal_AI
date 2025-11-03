@@ -186,6 +186,10 @@
   gap: var(--space-6);
 }
 
+.jobdetail__body--full-width {
+  grid-template-columns: 1fr;
+}
+
 .jobdetail__main {
   display: flex;
   flex-direction: column;
@@ -204,6 +208,15 @@
   padding: var(--space-3) var(--space-4);
   font-weight: var(--font-semibold);
   color: var(--gray-600);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  position: relative;
+}
+
+.jobdetail__tab:hover:not(.jobdetail__tab--active) {
+  color: var(--primary-500);
+  background: var(--primary-50);
+  border-radius: var(--radius-md);
 }
 
 .jobdetail__tab--active {

@@ -1,5 +1,7 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { setRecommendations, setActiveTab } from '../../store/slices/dashboardSlice'
 import Header from './components/Header'
 import Stats from './components/Stats'
 import Recommendations from './components/Recommendations'
@@ -9,19 +11,15 @@ import './Dashboard.css'
 /**
  * Dashboard Page (Container)
  * Home after sign-in: header with search, stats, recommendations, recent applications.
+ * Uses Redux for state management.
  */
 function Dashboard() {
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
+  const { stats, recommendations, activeTab } = useAppSelector((state) => state.dashboard)
 
-  // Mock data; replace with API later
-  const stats = useMemo(() => ([
-    { label: 'Matches', value: 24 },
-    { label: 'Applied', value: 8 },
-    { label: 'Interviews', value: 3 },
-    { label: 'Saved', value: 12 },
-  ]), [])
-
-  const recs = useMemo(() => ([
+  // Initialize mock data; replace with API later
+  const mockRecs = useMemo(() => ([
     { id: 'r1', company: 'Company A', role: 'Frontend Engineer', match: 88, location: 'Remote • US', workMode: 'Remote', level: 'Mid-level', experience: '3-5 years', applications: 42 },
     { id: 'r2', company: 'Company B', role: 'Fullstack Developer', match: 83, location: 'New York, NY', workMode: 'Hybrid', level: 'Senior', experience: '5+ years', applications: 18 },
     { id: 'r3', company: 'Company C', role: 'UI Engineer', match: 80, location: 'San Francisco, CA', workMode: 'Onsite', level: 'Associate', experience: '1-3 years', applications: 27 },
@@ -36,9 +34,13 @@ function Dashboard() {
     { id: 'r12', company: 'Company L', role: 'SPA Engineer', match: 77, location: 'Chicago, IL', workMode: 'Hybrid', level: 'Associate', experience: '1-3 years', applications: 24 },
   ]), [])
 
-  const onSearch = (q) => navigate(`/search?q=${encodeURIComponent(q)}`)
-  const [activeTab, setActiveTab] = useState('Recommended')
-  const counts = { Recommended: recs.length, Liked: 0, Applied: 0, External: 0, Notes: 0 }
+  useEffect(() => {
+    if (recommendations.length === 0) {
+      dispatch(setRecommendations(mockRecs))
+    }
+  }, [dispatch, recommendations.length, mockRecs])
+
+  const counts = { Recommended: recommendations.length, Liked: 0, Applied: 0, External: 0, Notes: 0 }
 
   return (
     <div className="dash">
@@ -49,12 +51,12 @@ function Dashboard() {
       </div>
 
       <div className="dash__container">
-        <Header onSearch={onSearch} />
-        <Stats items={stats} />
+        <Header />
+        <Stats />
         <div className="dash__section dash__section--compact">
-          <RecTabs active={activeTab} counts={counts} onChange={setActiveTab} />
+          <RecTabs counts={counts} />
         </div>
-        <Recommendations items={recs} onView={(id) => navigate(`/jobs/${id}`)} />
+        <Recommendations onView={(id) => navigate(`/jobs/${id}`)} />
       </div>
     </div>
   )

@@ -1,16 +1,20 @@
 import React from 'react'
+import { useAppSelector } from '../../../store/hooks'
 
 /**
  * Recommendations
  * Grid of recommended jobs with fit badge and quick actions.
+ * Uses Redux for recommendations data.
  *
- * @param {{ items: {id: string, company: string, role: string, match: number}[], onView: (id: string) => void }} props
+ * @param {{ onView: (id: string) => void }} props
  */
-function Recommendations({ items, onView }) {
+function Recommendations({ onView }) {
+  const { recommendations } = useAppSelector((state) => state.dashboard)
+
   return (
     <div className="dash__section dash__section--compact">
       <div className="dash__cards dash__cards--stack" role="list">
-        {items.map((c) => (
+        {recommendations.map((c) => (
           <div key={c.id} className="dash__card hover-lift" role="listitem">
             <div style={{ fontWeight: 700 }}>{c.company}</div>
             <div>{c.role}</div>

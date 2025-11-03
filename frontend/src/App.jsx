@@ -1,5 +1,7 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { Provider } from 'react-redux'
+import { store } from './store'
 import SignIn from './pages/SignIn/SignIn'
 import SignUp from './pages/SignUp/SignUp'
 import ProfileCreation from './pages/ProfileCreation/ProfileCreation'
@@ -17,9 +19,10 @@ import './styles/App.css'
  */
 function App() {
   return (
-    <Router>
-      <div className="app">
-        <Routes>
+    <Provider store={store}>
+      <Router>
+        <div className="app">
+          <Routes>
           {/* Sign In Route - Main authentication page */}
           <Route path="/signin" element={<SignIn />} />
           {/* Sign Up Route */}
@@ -44,9 +47,10 @@ function App() {
           
           {/* 404 Not Found Route */}
           <Route path="*" element={<Navigate to="/signin" replace />} />
-        </Routes>
-      </div>
-    </Router>
+          </Routes>
+        </div>
+      </Router>
+    </Provider>
   )
 }
 

@@ -1,5 +1,15 @@
-import React, { useState } from 'react'
+import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import {
+  updateSignUpField,
+  setSignUpErrors,
+  setSignUpGeneralError,
+  setSignUpLoading,
+  resetSignUpForm,
+  setUser,
+  setToken,
+} from '../../store/slices/authSlice'
 import { register } from '../../services/authService'
 import { validateSignUpForm, sanitizeInput } from '../../utils/validators'
 import './SignUp.css'
@@ -7,42 +17,61 @@ import './SignUp.css'
 /**
  * SignUp Page Component
  * Themed to match SignIn with social auth and strong validation
+ * Uses Redux for state management.
  */
 function SignUp() {
   const navigate = useNavigate()
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' })
-  const [errors, setErrors] = useState({})
-  const [isLoading, setIsLoading] = useState(false)
-  const [generalError, setGeneralError] = useState('')
-  const [hovered, setHovered] = useState(null)
-  const [showPassword, setShowPassword] = useState(false)
+  const dispatch = useAppDispatch()
+  const { signUpForm } = useAppSelector((state) => state.auth)
+  const [hovered, setHovered] = React.useState(null)
+
+  useEffect(() => {
+    return () => {
+      dispatch(resetSignUpForm())
+    }
+  }, [dispatch])
 
   const onChange = (e) => {
     const { name, value } = e.target
-    setFormData((p) => ({ ...p, [name]: sanitizeInput(value) }))
-    if (errors[name]) setErrors((p) => ({ ...p, [name]: '' }))
-    if (generalError) setGeneralError('')
+    dispatch(updateSignUpField({ field: name, value: sanitizeInput(value) }))
   }
 
   const onSubmit = async (e) => {
     e.preventDefault()
-    setErrors({})
-    setGeneralError('')
+    dispatch(setSignUpErrors({}))
+    dispatch(setSignUpGeneralError(''))
+    
+    const formData = {
+      name: signUpForm.name,
+      email: signUpForm.email,
+      password: signUpForm.password,
+      confirmPassword: signUpForm.confirmPassword,
+    }
+    
     const validation = validateSignUpForm(formData)
     if (!validation.isValid) {
-      setErrors(validation.errors)
+      dispatch(setSignUpErrors(validation.errors))
       return
     }
-    setIsLoading(true)
+    
+    dispatch(setSignUpLoading(true))
     try {
-      const res = await register({ name: formData.name, email: formData.email, password: formData.password })
-      console.log('Registered:', res.user)
+      const res = await register({
+        name: signUpForm.name,
+        email: signUpForm.email,
+        password: signUpForm.password,
+      })
+      
+      // Store user and token in Redux
+      dispatch(setUser(res.user))
+      dispatch(setToken(res.token))
+      
       // Redirect to profile creation after successful registration
       navigate('/profile/create')
     } catch (err) {
-      setGeneralError(err.message || 'Failed to sign up. Please try again.')
+      dispatch(setSignUpGeneralError(err.message || 'Failed to sign up. Please try again.'))
     } finally {
-      setIsLoading(false)
+      dispatch(setSignUpLoading(false))
     }
   }
 
@@ -60,56 +89,106 @@ function SignUp() {
           <p className="signup__subtitle">Join JobPortal AI to get personalized recommendations</p>
         </div>
 
-        <div className={`signup__card ${isLoading ? 'signup__card--loading' : ''}`} onMouseEnter={() => setHovered('card')} onMouseLeave={() => setHovered(null)}>
-          {generalError && (
+        <div className={`signup__card ${signUpForm.isLoading ? 'signup__card--loading' : ''}`} onMouseEnter={() => setHovered('card')} onMouseLeave={() => setHovered(null)}>
+          {signUpForm.generalError && (
             <div className="signup__error" role="alert">
-              <span>{generalError}</span>
+              <span>{signUpForm.generalError}</span>
             </div>
           )}
-
 
           <form className="signup__form" onSubmit={onSubmit} noValidate>
             <div className="input input--floating">
               <div className="input__container">
-                <input id="name" name="name" value={formData.name} onChange={onChange} placeholder=" " disabled={isLoading} className={`input__field ${errors.name ? 'input__field--error' : ''}`} />
+                <input
+                  id="name"
+                  name="name"
+                  value={signUpForm.name}
+                  onChange={onChange}
+                  placeholder=" "
+                  disabled={signUpForm.isLoading}
+                  className={`input__field ${signUpForm.errors.name ? 'input__field--error' : ''}`}
+                />
                 <label htmlFor="name" className="input__label">Full Name<span className="input__required">*</span></label>
                 <div className="input__focus-line"></div>
               </div>
-              {errors.name && <p className="input__error" role="alert">{errors.name}</p>}
+              {signUpForm.errors.name && <p className="input__error" role="alert">{signUpForm.errors.name}</p>}
             </div>
 
             <div className="input input--floating">
               <div className="input__container">
-                <input id="email" type="email" name="email" value={formData.email} onChange={onChange} placeholder=" " disabled={isLoading} className={`input__field ${errors.email ? 'input__field--error' : ''}`} autoComplete="email" />
+                <input
+                  id="email"
+                  type="email"
+                  name="email"
+                  value={signUpForm.email}
+                  onChange={onChange}
+                  placeholder=" "
+                  disabled={signUpForm.isLoading}
+                  className={`input__field ${signUpForm.errors.email ? 'input__field--error' : ''}`}
+                  autoComplete="email"
+                />
                 <label htmlFor="email" className="input__label">Email Address<span className="input__required">*</span></label>
                 <div className="input__focus-line"></div>
               </div>
-              {errors.email && <p className="input__error" role="alert">{errors.email}</p>}
+              {signUpForm.errors.email && <p className="input__error" role="alert">{signUpForm.errors.email}</p>}
             </div>
 
             <div className="input input--floating">
               <div className="input__container">
-                <input id="password" type={showPassword ? 'text' : 'password'} name="password" value={formData.password} onChange={onChange} placeholder=" " disabled={isLoading} className={`input__field ${errors.password ? 'input__field--error' : ''}`} autoComplete="new-password" />
+                <input
+                  id="password"
+                  type={signUpForm.showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={signUpForm.password}
+                  onChange={onChange}
+                  placeholder=" "
+                  disabled={signUpForm.isLoading}
+                  className={`input__field ${signUpForm.errors.password ? 'input__field--error' : ''}`}
+                  autoComplete="new-password"
+                />
                 <label htmlFor="password" className="input__label">Password<span className="input__required">*</span></label>
-                <button type="button" className="input__toggle-password" onClick={() => setShowPassword((s) => !s)} aria-label={showPassword ? 'Hide password' : 'Show password'} tabIndex={-1}>
-                  {showPassword ? '🔒' : '👁️‍🗨️'}
+                <button
+                  type="button"
+                  className="input__toggle-password"
+                  onClick={() => dispatch(updateSignUpField({ field: 'showPassword', value: !signUpForm.showPassword }))}
+                  aria-label={signUpForm.showPassword ? 'Hide password' : 'Show password'}
+                  tabIndex={-1}
+                >
+                  {signUpForm.showPassword ? '🔒' : '👁️‍🗨️'}
                 </button>
                 <div className="input__focus-line"></div>
               </div>
-              {errors.password && <p className="input__error" role="alert">{errors.password}</p>}
+              {signUpForm.errors.password && <p className="input__error" role="alert">{signUpForm.errors.password}</p>}
             </div>
 
             <div className="input input--floating">
               <div className="input__container">
-                <input id="confirmPassword" type={showPassword ? 'text' : 'password'} name="confirmPassword" value={formData.confirmPassword} onChange={onChange} placeholder=" " disabled={isLoading} className={`input__field ${errors.confirmPassword ? 'input__field--error' : ''}`} autoComplete="new-password" />
+                <input
+                  id="confirmPassword"
+                  type={signUpForm.showPassword ? 'text' : 'password'}
+                  name="confirmPassword"
+                  value={signUpForm.confirmPassword}
+                  onChange={onChange}
+                  placeholder=" "
+                  disabled={signUpForm.isLoading}
+                  className={`input__field ${signUpForm.errors.confirmPassword ? 'input__field--error' : ''}`}
+                  autoComplete="new-password"
+                />
                 <label htmlFor="confirmPassword" className="input__label">Confirm Password<span className="input__required">*</span></label>
                 <div className="input__focus-line"></div>
               </div>
-              {errors.confirmPassword && <p className="input__error" role="alert">{errors.confirmPassword}</p>}
+              {signUpForm.errors.confirmPassword && <p className="input__error" role="alert">{signUpForm.errors.confirmPassword}</p>}
             </div>
 
-            <button type="submit" className={`button button--primary button--medium button--full-width ${isLoading ? 'button--loading' : ''}`} disabled={isLoading} aria-busy={isLoading}>
-              <span className={isLoading ? 'button__text--loading' : 'button__text'}>{isLoading ? 'Creating account...' : 'Create Account'}</span>
+            <button
+              type="submit"
+              className={`button button--primary button--medium button--full-width ${signUpForm.isLoading ? 'button--loading' : ''}`}
+              disabled={signUpForm.isLoading}
+              aria-busy={signUpForm.isLoading}
+            >
+              <span className={signUpForm.isLoading ? 'button__text--loading' : 'button__text'}>
+                {signUpForm.isLoading ? 'Creating account...' : 'Create Account'}
+              </span>
               <div className="button__ripple"></div>
             </button>
           </form>
