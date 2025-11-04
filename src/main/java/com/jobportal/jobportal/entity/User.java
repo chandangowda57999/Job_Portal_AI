@@ -31,6 +31,10 @@ public class User {
     @Column(nullable = false, unique = true, length = 190)
     private String email;
 
+    /** User's password (hashed) */
+    @Column(nullable = false, length = 255)
+    private String password;
+
     /** User's first name */
     @Column(nullable = false, length = 120)
     private String firstName;

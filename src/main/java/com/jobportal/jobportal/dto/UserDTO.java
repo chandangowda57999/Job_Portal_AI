@@ -25,10 +25,9 @@ public class UserDTO {
     @Pattern(regexp = "^[a-zA-Z\\s'-]+$", message = "First name can only contain letters, spaces, hyphens, and apostrophes")
     private String firstName;
     
-    /** User's last name */
-    @NotBlank(message = "Last name is required")
+    /** User's last name (optional, but must be valid if provided) */
     @Size(min = 2, max = 120, message = "Last name must be between 2 and 120 characters")
-    @Pattern(regexp = "^[a-zA-Z\\s'-]+$", message = "Last name can only contain letters, spaces, hyphens, and apostrophes")
+    @Pattern(regexp = "^[a-zA-Z\\s'-]*$", message = "Last name can only contain letters, spaces, hyphens, and apostrophes")
     private String lastName;
     
     /** User's email address (unique) */
