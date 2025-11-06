@@ -115,13 +115,28 @@ class ValidationIntegrationTest {
 
     @Test
     void createJob_WithValidData_ShouldSucceed() throws Exception {
+        // First create a user to use as postedBy
+        UserDTO user = new UserDTO();
+        user.setFirstName("Employer");
+        user.setLastName("User");
+        user.setEmail("employer.job.test." + System.currentTimeMillis() + "@test.com");
+        user.setUserType("employer");
+        
+        String userResponse = mockMvc.perform(post("/api/v1/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        
+        UserDTO createdUser = objectMapper.readValue(userResponse, UserDTO.class);
+        
         JobDTO validJob = JobDTO.builder()
                 .title("Software Engineer")
                 .company("Tech Company")
                 .description("This is a comprehensive job description that meets the minimum character requirement for validation purposes.")
                 .jobType(Job.JobType.FULL_TIME)
                 .status(Job.JobStatus.ACTIVE)
-                .postedBy(1L)
+                .postedBy(createdUser.getId())
                 .build();
 
         mockMvc.perform(post("/api/v1/job")

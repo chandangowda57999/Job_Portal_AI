@@ -6,9 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.jobportal.jobportal.customexceptionhandler.UserNotFoundException;
-import com.jobportal.jobportal.dto.AuthResponse;
-import com.jobportal.jobportal.dto.LoginRequest;
-import com.jobportal.jobportal.dto.RegisterRequest;
+import com.jobportal.jobportal.dto.auth.AuthResponse;
+import com.jobportal.jobportal.dto.auth.LoginRequest;
+import com.jobportal.jobportal.dto.auth.RegisterRequest;
 import com.jobportal.jobportal.dto.UserDTO;
 import com.jobportal.jobportal.entity.User;
 import com.jobportal.jobportal.mapper.UserMapper;
@@ -63,7 +63,7 @@ public class AuthService {
         String[] nameParts = splitName(request.getName());
         String firstName = nameParts[0];
         // If only one name part, use it as lastName too to satisfy database constraint (nullable = false)
-        String lastName = nameParts.length > 1 ? nameParts[1] : firstName;
+        String lastName = (nameParts.length > 1 && !nameParts[1].isEmpty()) ? nameParts[1] : firstName;
 
         // Create User entity
         User user = User.builder()

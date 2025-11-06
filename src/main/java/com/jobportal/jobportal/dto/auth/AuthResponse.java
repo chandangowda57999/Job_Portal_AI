@@ -1,5 +1,6 @@
-package com.jobportal.jobportal.dto;
+package com.jobportal.jobportal.dto.auth;
 
+import com.jobportal.jobportal.dto.UserDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

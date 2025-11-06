@@ -6,9 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.jobportal.jobportal.dto.AuthResponse;
-import com.jobportal.jobportal.dto.LoginRequest;
-import com.jobportal.jobportal.dto.RegisterRequest;
+import com.jobportal.jobportal.dto.auth.AuthResponse;
+import com.jobportal.jobportal.dto.auth.LoginRequest;
+import com.jobportal.jobportal.dto.auth.RegisterRequest;
 import com.jobportal.jobportal.service.AuthService;
 
 /**
