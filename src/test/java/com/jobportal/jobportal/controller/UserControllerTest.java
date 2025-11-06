@@ -26,7 +26,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Unit tests for UserController.
  * Tests validation, error handling, and controller behavior.
  */
-@WebMvcTest(UserController.class)
+@WebMvcTest(controllers = UserController.class, excludeAutoConfiguration = {
+    org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+    org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration.class
+})
 class UserControllerTest {
 
     @Autowired
@@ -170,9 +173,9 @@ class UserControllerTest {
                 .content(objectMapper.writeValueAsString(invalidUser)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors.firstName").exists())
-                .andExpect(jsonPath("$.errors.lastName").exists())
                 .andExpect(jsonPath("$.errors.email").exists())
                 .andExpect(jsonPath("$.errors.userType").exists());
+                // Note: lastName is optional, so it won't appear in errors if not provided
 
         verify(userService, never()).create(any(UserDTO.class));
     }

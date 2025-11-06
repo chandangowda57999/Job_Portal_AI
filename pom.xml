@@ -41,6 +41,12 @@
       <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
 
+    <!-- Spring Security for password encoding -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+
     <!-- Session (single entry) -->
     <dependency>
       <groupId>org.springframework.session</groupId>

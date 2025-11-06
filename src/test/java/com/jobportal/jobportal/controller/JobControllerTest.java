@@ -30,7 +30,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Unit tests for JobController.
  * Tests validation, error handling, and controller behavior.
  */
-@WebMvcTest(JobController.class)
+@WebMvcTest(controllers = JobController.class, excludeAutoConfiguration = {
+    org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+    org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration.class
+})
 class JobControllerTest {
 
     @Autowired

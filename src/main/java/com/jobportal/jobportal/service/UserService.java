@@ -2,8 +2,8 @@ package com.jobportal.jobportal.service;
 
 import java.util.List;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,17 +26,20 @@ public class UserService {
 
     private final UserRepo repo;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * Constructor for UserService.
      * 
      * @param repo Repository for user database operations
      * @param userMapper MapStruct mapper for User conversions
+     * @param passwordEncoder Password encoder for hashing passwords
      */
     @Autowired
-    public UserService(UserRepo repo, UserMapper userMapper) {
+    public UserService(UserRepo repo, UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.repo = repo;
         this.userMapper = userMapper;
+        this.passwordEncoder = passwordEncoder;
     }
     
     /**
@@ -47,7 +50,21 @@ public class UserService {
      */
     @Transactional
     public UserDTO create(UserDTO userDto) {
+        // Ensure lastName is not null (database constraint requires it)
+        if (userDto.getLastName() == null || userDto.getLastName().trim().isEmpty()) {
+            // If lastName is not provided, use firstName as lastName to satisfy database constraint
+            userDto.setLastName(userDto.getFirstName() != null ? userDto.getFirstName() : "");
+        }
+        
         User entity = userMapper.toEntity(userDto);
+        
+        // Ensure password is set (database constraint requires it)
+        // If password is not provided, set a default temporary password
+        if (entity.getPassword() == null || entity.getPassword().trim().isEmpty()) {
+            // Set a default temporary password that needs to be changed
+            entity.setPassword(passwordEncoder.encode("TempPassword123!"));
+        }
+        
         User saved = repo.save(entity);
         return userMapper.toDto(saved);
     }

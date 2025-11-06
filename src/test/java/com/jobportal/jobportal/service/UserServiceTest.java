@@ -3,7 +3,9 @@ package com.jobportal.jobportal.service;
 import com.jobportal.jobportal.customexceptionhandler.UserNotFoundException;
 import com.jobportal.jobportal.dto.UserDTO;
 import com.jobportal.jobportal.entity.User;
+import com.jobportal.jobportal.mapper.UserMapper;
 import com.jobportal.jobportal.repo.UserRepo;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +30,12 @@ class UserServiceTest {
 
     @Mock
     private UserRepo userRepo;
+
+    @Mock
+    private UserMapper userMapper;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private UserService userService;
@@ -61,7 +69,10 @@ class UserServiceTest {
 
     @Test
     void create_WithValidData_ShouldReturnCreatedUser() {
+        when(userMapper.toEntity(any(UserDTO.class))).thenReturn(user);
+        when(passwordEncoder.encode(anyString())).thenReturn("$2a$10$hashedPassword");
         when(userRepo.save(any(User.class))).thenReturn(user);
+        when(userMapper.toDto(any(User.class))).thenReturn(userDTO);
 
         UserDTO result = userService.create(userDTO);
 
@@ -70,19 +81,26 @@ class UserServiceTest {
         assertThat(result.getFirstName()).isEqualTo("John");
         assertThat(result.getLastName()).isEqualTo("Doe");
         assertThat(result.getEmail()).isEqualTo("john.doe@example.com");
+        verify(userMapper, times(1)).toEntity(any(UserDTO.class));
         verify(userRepo, times(1)).save(any(User.class));
+        verify(userMapper, times(1)).toDto(any(User.class));
     }
 
     @Test
     void create_ShouldMapDTOToEntityCorrectly() {
+        when(userMapper.toEntity(any(UserDTO.class))).thenReturn(user);
+        when(passwordEncoder.encode(anyString())).thenReturn("$2a$10$hashedPassword");
         when(userRepo.save(any(User.class))).thenReturn(user);
+        when(userMapper.toDto(any(User.class))).thenReturn(userDTO);
 
         UserDTO result = userService.create(userDTO);
 
         assertThat(result.getUserType()).isEqualTo("candidate");
         assertThat(result.getPhoneNumber()).isEqualTo("1234567890");
         assertThat(result.getPhoneCountryCode()).isEqualTo("+1");
+        verify(userMapper, times(1)).toEntity(any(UserDTO.class));
         verify(userRepo, times(1)).save(any(User.class));
+        verify(userMapper, times(1)).toDto(any(User.class));
     }
 
     // ==================== GET BY ID TESTS ====================
@@ -90,6 +108,7 @@ class UserServiceTest {
     @Test
     void getById_WithExistingId_ShouldReturnUser() {
         when(userRepo.findById(1L)).thenReturn(Optional.of(user));
+        when(userMapper.toDto(any(User.class))).thenReturn(userDTO);
 
         UserDTO result = userService.getById(1L);
 
@@ -97,6 +116,7 @@ class UserServiceTest {
         assertThat(result.getId()).isEqualTo(1L);
         assertThat(result.getFirstName()).isEqualTo("John");
         verify(userRepo, times(1)).findById(1L);
+        verify(userMapper, times(1)).toDto(any(User.class));
     }
 
     @Test
@@ -115,12 +135,14 @@ class UserServiceTest {
     @Test
     void getByEmail_WithExistingEmail_ShouldReturnUser() {
         when(userRepo.findByEmail("john.doe@example.com")).thenReturn(Optional.of(user));
+        when(userMapper.toDto(any(User.class))).thenReturn(userDTO);
 
         UserDTO result = userService.getByEmail("john.doe@example.com");
 
         assertThat(result).isNotNull();
         assertThat(result.getEmail()).isEqualTo("john.doe@example.com");
         verify(userRepo, times(1)).findByEmail("john.doe@example.com");
+        verify(userMapper, times(1)).toDto(any(User.class));
     }
 
     @Test
@@ -147,8 +169,17 @@ class UserServiceTest {
                 .userType("employer")
                 .build();
 
+        UserDTO userDTO2 = new UserDTO();
+        userDTO2.setId(2L);
+        userDTO2.setFirstName("Jane");
+        userDTO2.setLastName("Smith");
+        userDTO2.setEmail("jane.smith@example.com");
+        userDTO2.setUserType("employer");
+
         List<User> users = Arrays.asList(user, user2);
         when(userRepo.findAll()).thenReturn(users);
+        when(userMapper.toDto(user)).thenReturn(userDTO);
+        when(userMapper.toDto(user2)).thenReturn(userDTO2);
 
         List<UserDTO> result = userService.getAllUserList();
 
@@ -156,6 +187,7 @@ class UserServiceTest {
         assertThat(result.get(0).getFirstName()).isEqualTo("John");
         assertThat(result.get(1).getFirstName()).isEqualTo("Jane");
         verify(userRepo, times(1)).findAll();
+        verify(userMapper, times(2)).toDto(any(User.class));
     }
 
     @Test
@@ -166,6 +198,7 @@ class UserServiceTest {
 
         assertThat(result).isEmpty();
         verify(userRepo, times(1)).findAll();
+        verify(userMapper, never()).toDto(any(User.class));
     }
 
     // ==================== UPDATE TESTS ====================
@@ -190,8 +223,18 @@ class UserServiceTest {
                 .userType("candidate")
                 .build();
 
+        UserDTO updatedDTO = new UserDTO();
+        updatedDTO.setId(1L);
+        updatedDTO.setFirstName("John");
+        updatedDTO.setLastName("Updated");
+        updatedDTO.setEmail("john.updated@example.com");
+        updatedDTO.setPhoneNumber("9876543210");
+        updatedDTO.setPhoneCountryCode("+1");
+        updatedDTO.setUserType("candidate");
+
         when(userRepo.findById(1L)).thenReturn(Optional.of(user));
         when(userRepo.save(any(User.class))).thenReturn(updatedUser);
+        when(userMapper.toDto(any(User.class))).thenReturn(updatedDTO);
 
         UserDTO result = userService.update(1L, updateDTO);
 
@@ -200,7 +243,9 @@ class UserServiceTest {
         assertThat(result.getEmail()).isEqualTo("john.updated@example.com");
         assertThat(result.getPhoneNumber()).isEqualTo("9876543210");
         verify(userRepo, times(1)).findById(1L);
+        verify(userMapper, times(1)).updateEntity(any(UserDTO.class), any(User.class));
         verify(userRepo, times(1)).save(any(User.class));
+        verify(userMapper, times(1)).toDto(any(User.class));
     }
 
     @Test
@@ -225,8 +270,17 @@ class UserServiceTest {
         updateDTO.setPhoneCountryCode("+44");
         updateDTO.setUserType("employer");
 
+        UserDTO updatedDTO = new UserDTO();
+        updatedDTO.setFirstName("UpdatedFirstName");
+        updatedDTO.setLastName("UpdatedLastName");
+        updatedDTO.setEmail("updated@example.com");
+        updatedDTO.setPhoneNumber("1111111111");
+        updatedDTO.setPhoneCountryCode("+44");
+        updatedDTO.setUserType("employer");
+
         when(userRepo.findById(1L)).thenReturn(Optional.of(user));
         when(userRepo.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(userMapper.toDto(any(User.class))).thenReturn(updatedDTO);
 
         UserDTO result = userService.update(1L, updateDTO);
 
@@ -234,7 +288,9 @@ class UserServiceTest {
         assertThat(result.getLastName()).isEqualTo("UpdatedLastName");
         assertThat(result.getEmail()).isEqualTo("updated@example.com");
         assertThat(result.getUserType()).isEqualTo("employer");
+        verify(userMapper, times(1)).updateEntity(any(UserDTO.class), any(User.class));
         verify(userRepo, times(1)).save(any(User.class));
+        verify(userMapper, times(1)).toDto(any(User.class));
     }
 
     // ==================== DELETE TESTS ====================

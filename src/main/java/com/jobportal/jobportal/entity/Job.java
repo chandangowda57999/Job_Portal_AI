@@ -45,16 +45,16 @@ public class Job {
     @Column(length = 100)
     private String category; // IT, FINANCE, MARKETING, etc.
 
-    @Column(columnDefinition = "TEXT")
+    @Lob
     private String description;
 
-    @Column(columnDefinition = "TEXT")
+    @Lob
     private String requirements;
 
-    @Column(columnDefinition = "TEXT")
+    @Lob
     private String responsibilities;
 
-    @Column(columnDefinition = "TEXT")
+    @Lob
     private String benefits;
 
     private BigDecimal salaryMin;
