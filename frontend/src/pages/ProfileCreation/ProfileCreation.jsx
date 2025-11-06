@@ -33,6 +33,9 @@ const ProfileCreation = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [generalError, setGeneralError] = useState('');
   const [hoveredElement, setHoveredElement] = useState(null);
+  const [resumeFile, setResumeFile] = useState(null);
+  const [resumePreview, setResumePreview] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   /**
    * Handles input field changes
@@ -75,10 +78,100 @@ const ProfileCreation = () => {
       newErrors.phoneNumber = 'Please enter a valid phone number';
     }
 
+    // Require resume for candidates; optional for employers
+    if (formData.userType === 'candidate' && !resumeFile) {
+      newErrors.resume = 'Please upload your resume (PDF, max 5MB)';
+    }
+
     return {
       isValid: Object.keys(newErrors).length === 0,
       errors: newErrors,
     };
+  };
+
+  /**
+   * Handles resume file selection and basic validation
+   * Accepts only PDF up to 5MB
+   */
+  const handleResumeChange = (file) => {
+    if (!file) return;
+
+    // Reset previous errors for resume
+    if (errors.resume) {
+      setErrors((prev) => ({ ...prev, resume: '' }));
+    }
+
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    const isUnder5Mb = file.size <= 5 * 1024 * 1024;
+
+    if (!isPdf) {
+      setErrors((prev) => ({ ...prev, resume: 'Only PDF files are allowed' }));
+      setResumeFile(null);
+      setResumePreview(null);
+      return;
+    }
+    if (!isUnder5Mb) {
+      setErrors((prev) => ({ ...prev, resume: 'File too large. Max size is 5MB' }));
+      setResumeFile(null);
+      setResumePreview(null);
+      return;
+    }
+
+    setResumeFile(file);
+    setResumePreview({ name: file.name, size: file.size });
+  };
+
+  /**
+   * Attempts to upload resume to backend API.
+   * Falls back to mock mode by saving metadata locally if backend is unavailable.
+   * Returns an object with resume metadata.
+   */
+  const uploadResumeIfProvided = async () => {
+    if (!resumeFile) return null;
+
+    setIsUploading(true);
+    try {
+      // Try real API first
+      const formData = new FormData();
+      formData.append('file', resumeFile);
+
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'}/v1/resumes/upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('jobportal_auth_token')}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const data = await response.json();
+      // Expecting backend to return { id, url, fileName, size }
+      return {
+        resumeId: data.id,
+        resumeUrl: data.url,
+        resumeFileName: data.fileName || resumeFile.name,
+        resumeFileSize: data.size || resumeFile.size,
+        resumeSource: 'api',
+      };
+    } catch (apiError) {
+      // Fallback to mock: store minimal metadata and an object URL (session-only)
+      if (shouldUseMockMode(apiError) && appConfig.ENABLE_MOCK_MODE) {
+        const objectUrl = URL.createObjectURL(resumeFile);
+        return {
+          resumeId: `mock_resume_${Date.now()}`,
+          resumeUrl: objectUrl,
+          resumeFileName: resumeFile.name,
+          resumeFileSize: resumeFile.size,
+          resumeSource: 'mock',
+        };
+      }
+      throw apiError;
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   /**
@@ -115,6 +208,26 @@ const ProfileCreation = () => {
         userType: formData.userType,
       };
 
+      // Upload resume if provided
+      let resumeMeta = null;
+      try {
+        resumeMeta = await uploadResumeIfProvided();
+      } catch (uploadErr) {
+        setGeneralError('Failed to upload resume. Please try again or continue without it.');
+        console.error('Resume upload error:', uploadErr);
+        return;
+      }
+
+      if (resumeMeta) {
+        updatedUserData.resume = {
+          id: resumeMeta.resumeId,
+          url: resumeMeta.resumeUrl,
+          fileName: resumeMeta.resumeFileName,
+          size: resumeMeta.resumeFileSize,
+          source: resumeMeta.resumeSource,
+        };
+      }
+
       // Try to update via API, fallback to mock mode if unavailable
       try {
         const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'}/v1/users/${currentUser.id}`, {
@@ -129,6 +242,7 @@ const ProfileCreation = () => {
             phoneCountryCode: formData.phoneCountryCode,
             phoneNumber: formData.phoneNumber.trim(),
             userType: formData.userType,
+            resume: updatedUserData.resume || undefined,
           }),
         });
 
@@ -151,6 +265,7 @@ const ProfileCreation = () => {
             phoneCountryCode: formData.phoneCountryCode,
             phoneNumber: formData.phoneNumber.trim(),
             userType: formData.userType,
+            resume: updatedUserData.resume || undefined,
           });
           
           // Use updated mock user if available, otherwise use local data
@@ -363,6 +478,58 @@ const ProfileCreation = () => {
                   <span>Employer</span>
                 </label>
               </div>
+            </div>
+
+            {/* Resume Upload */}
+            <div className="profile-creation__resume">
+              <label className="profile-creation__label">
+                Resume {formData.userType === 'candidate' && (<span className="input__required">*</span>)}
+              </label>
+
+              <div
+                className={`resume-dropzone ${errors.resume ? 'resume-dropzone--error' : ''} ${isUploading ? 'resume-dropzone--uploading' : ''}`}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  if (isLoading || isUploading) return;
+                  const file = e.dataTransfer.files?.[0];
+                  handleResumeChange(file);
+                }}
+              >
+                <input
+                  id="resume"
+                  type="file"
+                  accept="application/pdf"
+                  onChange={(e) => handleResumeChange(e.target.files?.[0])}
+                  disabled={isLoading || isUploading}
+                  className="resume-input"
+                />
+                <div className="resume-content">
+                  <div className="resume-icon" aria-hidden="true">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                  </div>
+                  <div className="resume-text">
+                    {resumePreview ? (
+                      <>
+                        <span className="resume-file-name">{resumePreview.name}</span>
+                        <span className="resume-file-size">{Math.round(resumePreview.size / 1024)} KB</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="resume-title">Drag & drop your resume here</span>
+                        <span className="resume-subtitle">or click to browse (PDF, max 5MB)</span>
+                      </>
+                    )}
+                  </div>
+                  {isUploading && <div className="resume-spinner" aria-label="Uploading"></div>}
+                </div>
+              </div>
+              {errors.resume && (
+                <p className="input__error" role="alert">{errors.resume}</p>
+              )}
             </div>
 
             {/* Submit Button */}
