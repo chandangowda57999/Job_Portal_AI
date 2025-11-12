@@ -79,6 +79,36 @@ export const fetchJobsByCompany = async (company) => {
 };
 
 /**
+ * Fetch job detail by ID
+ * @param {string|number} jobId - Job ID
+ * @param {number} userId - Optional user ID for match score calculation
+ * @returns {Promise<Object>} Job detail with match score and similar jobs
+ */
+export const fetchJobDetail = async (jobId, userId = null) => {
+  try {
+    const url = userId 
+      ? `${API_BASE_URL}/v1/job/${jobId}/detail?userId=${userId}`
+      : `${API_BASE_URL}/v1/job/${jobId}/detail`;
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch job detail: ${response.statusText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching job detail:', error);
+    throw error;
+  }
+};
+
+/**
  * Fetch user profile
  * @param {number} userId - User ID
  * @returns {Promise<Object>} User profile data
@@ -124,6 +154,103 @@ export const calculateJobMatch = (job, userProfile) => {
 
   // Add more sophisticated matching logic here
   return Math.min(100, Math.max(0, match));
+};
+
+/**
+ * Format job type enum to readable string
+ * @param {string} jobType - Job type enum (FULL_TIME, PART_TIME, CONTRACT, INTERNSHIP)
+ * @returns {string} Formatted job type (Full-time, Part-time, Contract, Internship)
+ */
+const formatJobType = (jobType) => {
+  if (!jobType) return 'Not specified';
+  const typeMap = {
+    'FULL_TIME': 'Full-time',
+    'PART_TIME': 'Part-time',
+    'CONTRACT': 'Contract',
+    'INTERNSHIP': 'Internship',
+  };
+  return typeMap[jobType] || jobType;
+};
+
+/**
+ * Format salary range to simplified format ($, $$, $$$)
+ * @param {number} salaryMin - Minimum salary
+ * @param {number} salaryMax - Maximum salary
+ * @param {string} currency - Currency code (USD, EUR, etc.)
+ * @returns {string} Formatted salary ($, $$, $$$)
+ */
+const formatSalary = (salaryMin, salaryMax, currency = 'USD') => {
+  if (!salaryMin || !salaryMax) return '$';
+  
+  // Average salary for categorization
+  const avgSalary = (salaryMin + salaryMax) / 2;
+  
+  // Convert to USD if needed (simplified - in production, use actual exchange rates)
+  let usdSalary = avgSalary;
+  if (currency === 'EUR') {
+    usdSalary = avgSalary * 1.1; // Approximate conversion
+  } else if (currency === 'INR') {
+    usdSalary = avgSalary / 83; // Approximate conversion
+  }
+  
+  // Categorize by salary range
+  if (usdSalary < 80000) return '$';
+  if (usdSalary < 150000) return '$$';
+  return '$$$';
+};
+
+/**
+ * Generate badges for job (Remote, Urgent, etc.)
+ * @param {Object} job - Job object
+ * @returns {string[]} Array of badge strings
+ */
+const generateBadges = (job) => {
+  const badges = [];
+  
+  // Remote badge
+  if (job.workMode === 'REMOTE') {
+    badges.push('Remote');
+  }
+  
+  // Urgent badge (if posted within last 3 days)
+  if (job.createdAt) {
+    const createdAt = new Date(job.createdAt);
+    const now = new Date();
+    const daysSincePosted = (now - createdAt) / (1000 * 60 * 60 * 24);
+    if (daysSincePosted <= 3) {
+      badges.push('Urgent');
+    }
+  }
+  
+  return badges;
+};
+
+/**
+ * Transform backend job data to search page format
+ * @param {Object} job - Job from backend (JobDTO)
+ * @returns {Object} Transformed job for search page
+ */
+export const transformJobForSearch = (job) => {
+  return {
+    id: job.id?.toString() || '',
+    role: job.title || 'Unknown Role',
+    company: job.company || 'Unknown Company',
+    location: job.location || 'Not specified',
+    salary: formatSalary(job.salaryMin, job.salaryMax, job.salaryCurrency),
+    type: formatJobType(job.jobType),
+    badges: generateBadges(job),
+    // Keep additional fields for future use
+    salaryMin: job.salaryMin,
+    salaryMax: job.salaryMax,
+    salaryCurrency: job.salaryCurrency || 'USD',
+    jobType: job.jobType,
+    workMode: job.workMode,
+    experienceLevel: job.experienceLevel,
+    description: job.description,
+    requirements: job.requirements,
+    createdAt: job.createdAt,
+    applicationDeadline: job.applicationDeadline,
+  };
 };
 
 /**

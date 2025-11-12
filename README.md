@@ -56,6 +56,8 @@ This will start MySQL 8.0 container with the following configuration:
 - **Password**: jobportal_pass
 - **Root Password**: rootpassword
 
+**Note**: On first startup, the database will be automatically seeded with test data (2 users and 3 jobs) from `seed-data.sql`. This happens automatically when the database volume is empty.
+
 To check if MySQL is running:
 ```bash
 docker ps
@@ -82,6 +84,25 @@ The application will start on **http://localhost:8081**
 
 ## Database Management
 
+### Seed Data (Test Data)
+
+The database is automatically seeded with test data on first initialization:
+
+**Test Users:**
+- `employer@example.com` / `password123` (employer - can post jobs)
+- `candidate@example.com` / `password123` (candidate - can apply to jobs)
+
+**Test Jobs:**
+- Senior Software Engineer (Tech Corp)
+- Frontend Developer (Web Solutions Inc)
+- DevOps Engineer (Cloud Systems)
+
+**Note**: Seed data is only loaded when the database volume is empty (first time setup). To reset the database and reload seed data, use the reset script:
+
+```bash
+./scripts/reset-db.sh
+```
+
 ### Connect to MySQL
 
 You can connect to MySQL using any MySQL client with these credentials:
@@ -96,6 +117,21 @@ You can connect to MySQL using any MySQL client with these credentials:
 ```bash
 mysql -h localhost -P 3306 -u jobportal_user -pjobportal_pass jobportal_db
 ```
+
+### Reset Database (Reload Seed Data)
+
+To reset the database and reload test data:
+
+```bash
+./scripts/reset-db.sh
+```
+
+This will:
+1. Stop MySQL container
+2. Remove database volume (deletes all data)
+3. Restart MySQL container
+4. Automatically load seed data
+5. Verify data was loaded successfully
 
 ### Stop MySQL Container
 

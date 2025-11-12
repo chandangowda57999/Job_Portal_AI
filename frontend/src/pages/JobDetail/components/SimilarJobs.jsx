@@ -4,17 +4,18 @@ import { useAppSelector } from '../../../store/hooks'
 /**
  * SimilarJobs Component
  * 
- * Displays a list of similar job opportunities related to the current job posting.
- * Each job shows its title, company name, and AI-calculated match percentage.
- * Jobs are clickable and navigate to their detail pages.
+ * Displays a list of similar job opportunities in the sidebar.
+ * Helps users discover related jobs that match their profile.
  * 
- * This component appears in two places:
- * 1. In the sidebar when "Description" tab is active (quick reference)
- * 2. As full content when "Similar Jobs" tab is active
+ * This component is part of the job detail sidebar and displays:
+ * - List of similar job opportunities
+ * - Job title and company name
+ * - Match percentage for each job
+ * - Clickable items that navigate to job details
  * 
  * @component
  * @param {Object} props - Component props
- * @param {Function} [props.onJobClick] - Optional callback when a job is clicked
+ * @param {Function} props.onJobClick - Callback function when a similar job is clicked
  * @param {string} props.onJobClick.id - Job ID to navigate to
  * 
  * @returns {JSX.Element} Rendered similar jobs list card
@@ -43,55 +44,60 @@ function SimilarJobs({ onJobClick }) {
    * - match: Match percentage (0-100)
    * 
    * @type {Array<Object>}
-   * @property {string} id - Job identifier
-   * @property {string} title - Job title
-   * @property {string} company - Company name
-   * @property {number} match - Match percentage (0-100)
    */
-  const items = currentJob?.similarJobs || []
+  const similarJobs = currentJob?.similarJobs || []
 
   // ============================================
   // Render
   // ============================================
   
-  // Don't render if no similar jobs available
-  if (items.length === 0) return null
+  // Don't render if no similar jobs are available
+  if (similarJobs.length === 0) return null
 
   return (
     <div className="jobdetail__card card">
       {/* Section Title */}
-      <div className="jobdetail__aside-title">Similar Jobs</div>
+      {/* Displays the title for the similar jobs section */}
+      <div className="jobdetail__aside-title">Similar Opportunities</div>
 
       {/* Similar Jobs List */}
       {/* 
-        Renders each similar job as a clickable list item.
-        Shows job title, company, and match percentage.
+        Displays a list of similar job opportunities:
+        - Job title and company name
+        - Match percentage badge
+        - Clickable to navigate to job details
       */}
       <ul className="jobdetail__similar">
-        {items.map((s) => (
+        {similarJobs.map((job) => (
           <li
-            key={s.id}
-            className="hover-lift"
+            key={job.id}
+            className="jobdetail__similar-item"
             style={{ cursor: onJobClick ? 'pointer' : 'default' }}
-            onClick={onJobClick ? () => onJobClick(s.id) : undefined}
+            onClick={onJobClick ? () => onJobClick(job.id) : undefined}
             role="button"
             tabIndex={0}
             onKeyPress={(e) => {
-              // Enable keyboard navigation
-              if (onJobClick && (e.key === 'Enter' || e.key === ' ')) {
+              if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault()
-                onJobClick(s.id)
+                if (onJobClick) onJobClick(job.id)
               }
             }}
-            aria-label={`View ${s.title} at ${s.company}, ${s.match}% match`}
+            aria-label={`View ${job.title} at ${job.company}, ${job.match}% match`}
           >
-            {/* Job Info */}
+            {/* Job Title and Company */}
             <div>
-              <div className="jobdetail__similar-title">{s.title}</div>
-              <div className="jobdetail__similar-sub">{s.company}</div>
+              <div className="jobdetail__similar-title">{job.title}</div>
+              <div className="jobdetail__similar-sub">{job.company}</div>
             </div>
-            {/* Match Score */}
-            <div className="jobdetail__similar-fit">{s.match}%</div>
+            
+            {/* Match Percentage Badge */}
+            {/* 
+              Visual indicator of job match:
+              - Displays match percentage (0-100)
+              - Gradient background for visual appeal
+              - Rounded badge style
+            */}
+            <div className="jobdetail__similar-fit">{job.match}%</div>
           </li>
         ))}
       </ul>
@@ -100,5 +106,4 @@ function SimilarJobs({ onJobClick }) {
 }
 
 export default SimilarJobs
-
 

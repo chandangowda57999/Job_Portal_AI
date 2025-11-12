@@ -10,12 +10,12 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: '0.0.0.0',
-    port: 8081,
+    port: 8082, // Frontend runs on port 8082
     strictPort: false,
     proxy: {
-      // Proxy API requests to backend server
+      // Proxy API requests to backend server (running on port 8081)
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:8081',
         changeOrigin: true,
         secure: false
       }

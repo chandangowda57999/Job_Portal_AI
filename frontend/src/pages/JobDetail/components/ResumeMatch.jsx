@@ -4,15 +4,14 @@ import { useAppSelector } from '../../../store/hooks'
 /**
  * ResumeMatch Component
  * 
- * Displays an explainable breakdown of how the user's resume matches the job requirements.
- * Shows individual match factors (skills, experience, etc.) with their respective scores
- * as visual progress bars. This transparency helps users understand why they received
- * a particular match score and what areas they could improve.
+ * Displays a breakdown of the resume match score with individual factors.
+ * Shows how the user's resume matches the job requirements, providing
+ * explainable AI recommendations.
  * 
- * Features:
- * - Visual progress bars for each match factor
- * - Percentage scores for each factor
- * - "Improve fit" action button
+ * This component is part of the job detail sidebar and displays:
+ * - Match score breakdown by factor (skills, experience, etc.)
+ * - Progress bars for each factor
+ * - Visual indicators for match strength
  * 
  * @component
  * @returns {JSX.Element} Rendered resume match breakdown card
@@ -40,9 +39,6 @@ function ResumeMatch() {
    * - score: Match score for this factor (0-1)
    * 
    * @type {Array<Object>}
-   * @property {string} label - Factor name
-   * @property {number} weight - Weight importance (0-1)
-   * @property {number} score - Match score (0-1)
    */
   const factors = currentJob?.matchFactors || []
 
@@ -50,49 +46,51 @@ function ResumeMatch() {
   // Render
   // ============================================
   
+  // Don't render if no match factors are available
+  if (factors.length === 0) return null
+
   return (
     <div className="jobdetail__card card">
       {/* Section Title */}
+      {/* Displays the title for the resume match breakdown */}
       <div className="jobdetail__aside-title">Resume Match Breakdown</div>
 
-      {/* Match Factors List */}
+      {/* Match Factors Grid */}
       {/* 
-        Renders each match factor as a progress bar showing:
-        - Factor name (e.g., "React", "TypeScript")
-        - Match percentage for that factor
-        - Visual progress bar representation
+        Displays individual match factors with:
+        - Factor name (label)
+        - Match percentage (score * 100)
+        - Visual progress bar
       */}
       <div className="jobdetail__factors">
-        {factors.map((f) => {
-          /**
-           * Calculate percentage score (0-100) from decimal score (0-1)
-           * @type {number}
-           */
-          const pct = Math.round(f.score * 100)
-
+        {factors.map((factor, index) => {
+          // Calculate percentage from score (0-1 to 0-100)
+          const percentage = Math.round(factor.score * 100)
+          
           return (
-            <div key={f.label} className="jobdetail__factor">
-              {/* Factor Header Row */}
-              {/* Shows factor name and percentage score */}
+            <div key={index} className="jobdetail__factor">
+              {/* Factor Label and Score Row */}
               <div className="jobdetail__factor-row">
-                <span>{f.label}</span>
-                <span className="jobdetail__factor-score">{pct}%</span>
+                <span>{factor.label}</span>
+                <span className="jobdetail__factor-score">{percentage}%</span>
               </div>
-
-              {/* Progress Bar Visualization */}
+              
+              {/* Progress Bar */}
               {/* 
-                Visual representation of match percentage.
-                Width of fill bar corresponds to match percentage.
+                Visual representation of match strength:
+                - Width based on percentage (0-100%)
+                - Gradient background for visual appeal
+                - Smooth transition animation
               */}
               <div className="jobdetail__bar">
                 <div
                   className="jobdetail__bar-fill"
-                  style={{ width: `${pct}%` }}
+                  style={{ width: `${percentage}%` }}
                   role="progressbar"
-                  aria-valuenow={pct}
+                  aria-valuenow={percentage}
                   aria-valuemin={0}
                   aria-valuemax={100}
-                  aria-label={`${f.label} match: ${pct}%`}
+                  aria-label={`${factor.label} match: ${percentage}%`}
                 ></div>
               </div>
             </div>
@@ -100,26 +98,24 @@ function ResumeMatch() {
         })}
       </div>
 
-      {/* Action Button */}
+      {/* Improve Fit Button */}
       {/* 
-        Provides action to help user improve their match score.
-        Could open suggestions, skill recommendations, or resume tips.
+        Call-to-action button for users to improve their resume match:
+        - Suggests actions to increase match score
+        - Could open a modal or navigate to resume editing page
       */}
       <button
         className="jobdetail__improve"
         type="button"
         onClick={() => {
-          // TODO: Implement improve fit functionality
-          // Could open modal with suggestions, link to resume builder, etc.
           alert('Improve fit suggestions coming soon!')
         }}
       >
-        Improve fit
+        <span>Improve fit</span>
       </button>
     </div>
   )
 }
 
 export default ResumeMatch
-
 

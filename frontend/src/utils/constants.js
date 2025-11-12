@@ -15,7 +15,9 @@
  * To configure: Set VITE_API_BASE_URL in .env file
  * Example: VITE_API_BASE_URL=http://localhost:8080/api
  */
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+// Use proxy in development (vite.config.js proxies /api to http://localhost:8081)
+// In production, use absolute URL from environment variable
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? '/api' : 'http://localhost:8081/api');
 
 /**
  * Google OAuth Configuration
