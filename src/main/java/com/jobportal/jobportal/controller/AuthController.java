@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.jobportal.jobportal.dto.auth.ApiTokenRequest;
 import com.jobportal.jobportal.dto.auth.AuthResponse;
 import com.jobportal.jobportal.dto.auth.LoginRequest;
 import com.jobportal.jobportal.dto.auth.RegisterRequest;
@@ -59,5 +60,23 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * API token generation endpoint.
+     * Generates a JWT token using API secret only.
+     * 
+     * @param request API token request containing secret
+     * @return ResponseEntity containing authentication response with token
+     */
+    @PostMapping("/token")
+    public ResponseEntity<AuthResponse> generateToken(@Valid @RequestBody ApiTokenRequest request) {
+        try {
+            AuthResponse response = authService.generateApiToken(request);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            // Re-throw to let the global exception handler process it with proper error response
+            throw e;
+        }
     }
 }

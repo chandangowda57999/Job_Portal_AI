@@ -1,6 +1,6 @@
 /**
  * Application-wide constants
- * Centralized configuration for API endpoints, OAuth URLs, and validation rules
+ * Centralized configuration for API endpoints and validation rules
  * 
  * NOTE: When transitioning from mock mode to real database:
  * - Update VITE_API_BASE_URL in .env file to point to your backend
@@ -18,28 +18,6 @@
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 
 /**
- * Google OAuth Configuration
- * Contains client ID and redirect URI for Google authentication
- */
-export const GOOGLE_OAUTH = {
-  CLIENT_ID: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-  REDIRECT_URI: import.meta.env.VITE_GOOGLE_REDIRECT_URI || 'http://localhost:3000/auth/google/callback',
-  AUTH_URL: 'https://accounts.google.com/o/oauth2/v2/auth',
-  SCOPE: 'email profile'
-};
-
-/**
- * LinkedIn OAuth Configuration
- * Contains client ID, redirect URI, and required scopes for LinkedIn authentication
- */
-export const LINKEDIN_OAUTH = {
-  CLIENT_ID: import.meta.env.VITE_LINKEDIN_CLIENT_ID,
-  REDIRECT_URI: import.meta.env.VITE_LINKEDIN_REDIRECT_URI || 'http://localhost:3000/auth/linkedin/callback',
-  AUTH_URL: 'https://www.linkedin.com/oauth/v2/authorization',
-  SCOPE: import.meta.env.VITE_LINKEDIN_SCOPE || 'r_liteprofile r_emailaddress'
-};
-
-/**
  * API Endpoints
  * Centralized definition of all backend API endpoints
  */
@@ -48,8 +26,6 @@ export const API_ENDPOINTS = {
   AUTH: {
     LOGIN: '/auth/login',
     REGISTER: '/auth/register',
-    GOOGLE_CALLBACK: '/auth/google/callback',
-    LINKEDIN_CALLBACK: '/auth/linkedin/callback',
     LOGOUT: '/auth/logout'
   },
   // User management endpoints
@@ -79,8 +55,8 @@ export const VALIDATION_RULES = {
   },
   PASSWORD: {
     MIN_LENGTH: 8,
-    PATTERN: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-    MESSAGE: 'Password must be at least 8 characters with uppercase, lowercase, number, and special character'
+    PATTERN: /.*[a-zA-Z].*/, // Must contain at least one letter
+    MESSAGE: 'Password must be at least 8 characters and contain at least one letter'
   }
 };
 
@@ -99,8 +75,7 @@ export const UI_CONSTANTS = {
   ERROR_MESSAGES: {
     NETWORK_ERROR: 'Network error. Please check your connection.',
     INVALID_CREDENTIALS: 'Invalid email or password',
-    SERVER_ERROR: 'Server error. Please try again later.',
-    OAUTH_FAILED: 'Authentication failed. Please try again.'
+    SERVER_ERROR: 'Server error. Please try again later.'
   },
   // Loading states
   LOADING_MESSAGES: {

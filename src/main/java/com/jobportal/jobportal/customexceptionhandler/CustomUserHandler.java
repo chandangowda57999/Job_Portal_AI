@@ -25,13 +25,29 @@ public class CustomUserHandler {
 
     /**
      * Handles validation errors from @Valid annotation.
-     * Returns detailed field-level error messages.
+     * For login endpoint, returns generic "Invalid email or password" message for security.
+     * For token endpoint, returns detailed validation errors.
+     * For other endpoints, returns detailed field-level error messages.
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationErrors(
             MethodArgumentNotValidException ex, 
             HttpServletRequest request) {
         
+        String requestPath = request.getRequestURI();
+        
+        // For login endpoint, return generic error message for security
+        // Don't reveal validation details (invalid email format, password requirements, etc.)
+        if (requestPath != null && requestPath.contains("/api/auth/login")) {
+            ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Invalid email or password",
+                requestPath
+            );
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+        
+        // For token endpoint and other endpoints, return detailed field-level error messages
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName = ((FieldError) error).getField();
@@ -39,10 +55,14 @@ public class CustomUserHandler {
             errors.put(fieldName, errorMessage);
         });
         
+        String message = requestPath != null && requestPath.contains("/api/auth/token") 
+            ? "Validation failed. Please check the secret field."
+            : "Validation failed for one or more fields";
+        
         ErrorResponse errorResponse = new ErrorResponse(
             HttpStatus.BAD_REQUEST.value(),
-            "Validation failed for one or more fields",
-            request.getRequestURI(),
+            message,
+            requestPath,
             errors
         );
         

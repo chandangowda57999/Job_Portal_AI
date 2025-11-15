@@ -1,5 +1,6 @@
 package com.jobportal.jobportal.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -8,11 +9,13 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.jobportal.jobportal.filter.JwtAuthenticationFilter;
 
 /**
  * Spring Security configuration.
- * Configures password encoding and disables default authentication
- * (authentication is handled manually in AuthController).
+ * Configures password encoding, JWT authentication, and security filter chain.
  * 
  * @author Job Portal Team
  * @version 1.0
@@ -20,6 +23,13 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Autowired
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
 
     /**
      * Provides BCrypt password encoder bean for password hashing.
@@ -32,8 +42,9 @@ public class SecurityConfig {
     }
 
     /**
-     * Configures security filter chain.
-     * Disables default Spring Security authentication to allow manual handling.
+     * Configures security filter chain with JWT authentication.
+     * Public endpoints (auth, swagger) are accessible without authentication.
+     * Other endpoints require JWT authentication.
      * 
      * @param http HttpSecurity object to configure
      * @return SecurityFilterChain
@@ -43,12 +54,19 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
+            .cors(cors -> {})
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll()
+                // Public endpoints
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api-docs/**").permitAll()
+                // All other endpoints require authentication
+                .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            );
+            )
+            // Add JWT filter before UsernamePasswordAuthenticationFilter
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         
         return http.build();
     }

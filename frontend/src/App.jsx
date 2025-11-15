@@ -41,10 +41,6 @@ function App() {
           {/* Default route redirects to sign in */}
           <Route path="/" element={<Navigate to="/signin" replace />} />
           
-          {/* OAuth Callback Routes - Handle OAuth redirects */}
-          <Route path="/auth/google/callback" element={<div>Processing Google authentication...</div>} />
-          <Route path="/auth/linkedin/callback" element={<div>Processing LinkedIn authentication...</div>} />
-          
           {/* 404 Not Found Route */}
           <Route path="*" element={<Navigate to="/signin" replace />} />
           </Routes>
