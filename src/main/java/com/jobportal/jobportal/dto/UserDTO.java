@@ -26,7 +26,7 @@ public class UserDTO {
     private String firstName;
     
     /** User's last name (optional, but must be valid if provided) */
-    @Size(min = 2, max = 120, message = "Last name must be between 2 and 120 characters")
+    @Size(min = 0, max = 120, message = "Last name must not exceed 120 characters")
     @Pattern(regexp = "^[a-zA-Z\\s'-]*$", message = "Last name can only contain letters, spaces, hyphens, and apostrophes")
     private String lastName;
     

@@ -69,8 +69,9 @@ public class AuthService {
         // Split name into firstName and lastName
         String[] nameParts = splitName(request.getName());
         String firstName = nameParts[0];
-        // If only one name part, use it as lastName too to satisfy database constraint (nullable = false)
-        String lastName = (nameParts.length > 1 && !nameParts[1].isEmpty()) ? nameParts[1] : firstName;
+        // If only one name part, set lastName to empty string (not firstName)
+        // Database requires non-null, so we use empty string instead of duplicating firstName
+        String lastName = (nameParts.length > 1 && !nameParts[1].isEmpty()) ? nameParts[1] : "";
 
         // Create User entity
         // Password is encrypted with BCrypt before storing (never stored in plain text)

@@ -18,9 +18,11 @@ const ProfileCreation = () => {
   const currentUser = getUserData();
   
   // Form state
+  // Note: firstName and lastName start empty even if set during registration
+  // This allows users to enter their profile information fresh on this page
   const [formData, setFormData] = useState({
-    firstName: currentUser?.firstName || '',
-    lastName: currentUser?.lastName || '',
+    firstName: '',
+    lastName: '',
     phoneCountryCode: currentUser?.phoneCountryCode || '+1',
     phoneNumber: currentUser?.phoneNumber || '',
     userType: currentUser?.userType || 'candidate',
@@ -64,22 +66,35 @@ const ProfileCreation = () => {
   const validateForm = () => {
     const newErrors = {};
 
+    // Validate firstName - backend expects: 2-120 chars, letters/spaces/hyphens/apostrophes only
     if (!formData.firstName || formData.firstName.trim().length < 2) {
       newErrors.firstName = 'First name must be at least 2 characters';
+    } else if (formData.firstName.trim().length > 120) {
+      newErrors.firstName = 'First name must not exceed 120 characters';
+    } else if (!/^[a-zA-Z\s'-]+$/.test(formData.firstName.trim())) {
+      newErrors.firstName = 'First name can only contain letters, spaces, hyphens, and apostrophes';
     }
 
+    // Validate lastName - backend expects: 2-120 chars if provided, letters/spaces/hyphens/apostrophes only
     if (!formData.lastName || formData.lastName.trim().length < 2) {
       newErrors.lastName = 'Last name must be at least 2 characters';
+    } else if (formData.lastName.trim().length > 120) {
+      newErrors.lastName = 'Last name must not exceed 120 characters';
+    } else if (!/^[a-zA-Z\s'-]+$/.test(formData.lastName.trim())) {
+      newErrors.lastName = 'Last name can only contain letters, spaces, hyphens, and apostrophes';
     }
 
-    if (formData.phoneNumber && formData.phoneNumber.length < 10) {
-      newErrors.phoneNumber = 'Please enter a valid phone number';
+    // Validate phone number if provided
+    // Backend expects: 10-15 digits only (no spaces, dashes, etc.)
+    if (formData.phoneNumber && formData.phoneNumber.trim().length > 0) {
+      const cleanedPhone = formData.phoneNumber.trim().replace(/\D/g, '');
+      if (cleanedPhone.length < 10 || cleanedPhone.length > 15) {
+        newErrors.phoneNumber = 'Phone number must be between 10 and 15 digits';
+      }
     }
 
-    // Require resume for candidates; optional for employers
-    if (formData.userType === 'candidate' && !resumeFile) {
-      newErrors.resume = 'Please upload your resume (PDF, max 5MB)';
-    }
+    // Resume is optional - users can upload it later if needed
+    // Validation is done at upload time, not here
 
     return {
       isValid: Object.keys(newErrors).length === 0,
@@ -121,19 +136,29 @@ const ProfileCreation = () => {
 
   /**
    * Attempts to upload resume to backend API.
-   * Falls back to mock mode by saving metadata locally if backend is unavailable.
-   * Returns an object with resume metadata.
+   * Returns an object with resume metadata on success.
+   * 
+   * @returns {Promise<Object|null>} Resume metadata or null if no file provided
+   * @throws {Error} If upload fails
    */
   const uploadResumeIfProvided = async () => {
     if (!resumeFile) return null;
 
+    const currentUser = getUserData();
+    if (!currentUser || !currentUser.id) {
+      throw new Error('User not authenticated. Please sign in again.');
+    }
+
     setIsUploading(true);
     try {
-      // Try real API first
+      // Create FormData for file upload
       const formData = new FormData();
       formData.append('file', resumeFile);
 
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'}/v1/resumes/upload`, {
+      // Backend expects: POST /api/v1/resumes/upload/{userId}
+      // Use relative URL to leverage Vite proxy in development
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api';
+      const response = await fetch(`${apiBaseUrl}/v1/resumes/upload/${currentUser.id}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('jobportal_auth_token')}`,
@@ -142,20 +167,33 @@ const ProfileCreation = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Upload failed');
+        // Try to get error message from response
+        let errorMessage = 'Failed to upload resume';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch (e) {
+          // If response is not JSON, use status text
+          errorMessage = response.statusText || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
-      // Expecting backend to return { id, url, fileName, size }
+      // Backend returns ResumeDTO with: id, fileName, originalFileName, fileSize, filePath, etc.
       return {
         resumeId: data.id,
-        resumeUrl: data.url,
-        resumeFileName: data.fileName || resumeFile.name,
-        resumeFileSize: data.size || resumeFile.size,
+        resumeFileName: data.originalFileName || data.fileName || resumeFile.name,
+        resumeFileSize: data.fileSize || resumeFile.size,
+        resumeFilePath: data.filePath,
         resumeSource: 'api',
       };
     } catch (apiError) {
-      // Re-throw the error - no mock mode fallback
+      // Handle network errors (Failed to fetch, CORS, etc.)
+      if (apiError instanceof TypeError && apiError.message === 'Failed to fetch') {
+        throw new Error('Unable to connect to server. Please check if the backend is running and try again.');
+      }
+      // Re-throw other errors with original message
       throw apiError;
     } finally {
       setIsUploading(false);
@@ -185,73 +223,148 @@ const ProfileCreation = () => {
       if (!currentUser || !currentUser.id) {
         throw new Error('User not authenticated. Please sign in again.');
       }
+      
+      // Ensure email exists - it's required by backend validation
+      if (!currentUser.email) {
+        console.error('Current user data:', currentUser);
+        throw new Error('User email is missing. Please sign in again.');
+      }
 
-      // Prepare updated user data
-      const updatedUserData = {
-        ...currentUser,
-        firstName: formData.firstName.trim(),
-        lastName: formData.lastName.trim(),
-        phoneCountryCode: formData.phoneCountryCode,
-        phoneNumber: formData.phoneNumber.trim(),
-        userType: formData.userType,
-      };
-
-      // Upload resume if provided
+      // Upload resume if provided (non-blocking - profile can be saved without resume)
       let resumeMeta = null;
-      try {
-        resumeMeta = await uploadResumeIfProvided();
-      } catch (uploadErr) {
-        setGeneralError('Failed to upload resume. Please try again or continue without it.');
-        console.error('Resume upload error:', uploadErr);
-        return;
+      let resumeUploadError = null;
+      if (resumeFile) {
+        try {
+          resumeMeta = await uploadResumeIfProvided();
+          console.log('✅ Resume uploaded successfully');
+        } catch (uploadErr) {
+          // Log error but don't block profile creation
+          resumeUploadError = uploadErr.message || 'Failed to upload resume';
+          console.error('Resume upload error:', uploadErr);
+          // Show warning but allow user to continue
+          // The profile will be saved without resume, and user can upload resume later
+        }
       }
 
-      if (resumeMeta) {
-        updatedUserData.resume = {
-          id: resumeMeta.resumeId,
-          url: resumeMeta.resumeUrl,
-          fileName: resumeMeta.resumeFileName,
-          size: resumeMeta.resumeFileSize,
-          source: resumeMeta.resumeSource,
+      // Note: Resume metadata is not stored in user profile in the current backend structure
+      // Resumes are managed separately via the resume API
+      // If resume was uploaded successfully, it's already stored in the database
+
+      // Update user profile via API
+      try {
+        // Clean phone number: remove all non-digit characters
+        const cleanedPhoneNumber = formData.phoneNumber.trim().replace(/\D/g, '');
+        
+        // Clean and validate phone country code
+        // Backend expects: ^\+?[1-9]\d{0,3}$ (e.g., +1, +91, 1, 91)
+        let phoneCountryCode = formData.phoneCountryCode.trim();
+        if (phoneCountryCode && !/^\+?[1-9]\d{0,3}$/.test(phoneCountryCode)) {
+          // Invalid format, use default
+          phoneCountryCode = '+1';
+        }
+        
+        // Prepare request body - send null for empty optional fields to avoid validation errors
+        // Note: Email is required by backend, so we must include it from current user
+        const requestBody = {
+          firstName: formData.firstName.trim(),
+          lastName: formData.lastName.trim(),
+          email: currentUser.email || currentUser.emailAddress, // Email is required by backend validation
+          userType: formData.userType,
+          // Only include phone fields if they have values
+          phoneCountryCode: phoneCountryCode && phoneCountryCode.length > 0 ? phoneCountryCode : null,
+          phoneNumber: cleanedPhoneNumber && cleanedPhoneNumber.length > 0 ? cleanedPhoneNumber : null,
         };
-      }
+        
+        // Validate email is present before sending
+        if (!requestBody.email) {
+          console.error('Email is missing from user data:', currentUser);
+          throw new Error('Email is required but missing. Please sign in again.');
+        }
+        
+        console.log('Sending profile update request:', { 
+          ...requestBody, 
+          phoneNumber: cleanedPhoneNumber ? '***' : null,
+          email: requestBody.email ? '***' : null 
+        });
 
-      // Try to update via API, fallback to mock mode if unavailable
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'}/v1/users/${currentUser.id}`, {
+        // Use relative URL to leverage Vite proxy in development
+        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api';
+        const response = await fetch(`${apiBaseUrl}/v1/users/${currentUser.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('jobportal_auth_token')}`,
           },
-          body: JSON.stringify({
-            firstName: formData.firstName.trim(),
-            lastName: formData.lastName.trim(),
-            phoneCountryCode: formData.phoneCountryCode,
-            phoneNumber: formData.phoneNumber.trim(),
-            userType: formData.userType,
-            resume: updatedUserData.resume || undefined,
-          }),
+          body: JSON.stringify(requestBody),
         });
 
         if (!response.ok) {
-          throw new Error('API call failed');
+          let errorMessage = 'Failed to update profile';
+          let fieldErrors = {};
+          
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorData.error || errorMessage;
+            
+            // Extract field-specific validation errors
+            if (errorData.errors && typeof errorData.errors === 'object') {
+              fieldErrors = errorData.errors;
+            }
+          } catch (e) {
+            errorMessage = response.statusText || errorMessage;
+          }
+          
+          // If there are field-specific errors, show them in the form
+          if (Object.keys(fieldErrors).length > 0) {
+            setErrors(fieldErrors);
+            // Also show general error message
+            setGeneralError(errorMessage);
+          } else {
+            // No field-specific errors, just show general error
+            throw new Error(errorMessage);
+          }
+          return; // Stop execution if validation failed
         }
 
         const updatedUser = await response.json();
         setUserData(updatedUser);
         console.log('✅ Profile updated via API');
+
+        // Handle resume upload status
+        if (resumeUploadError) {
+          // Profile saved but resume upload failed
+          // Show warning but don't block - user can upload resume later
+          console.warn('⚠️ Profile saved but resume upload failed:', resumeUploadError);
+          // Note: Profile is complete, user can upload resume later from their profile
+        } else if (resumeMeta) {
+          console.log('✅ Profile and resume saved successfully');
+        }
+
+        // Profile saved successfully - redirect to dashboard
+        // Resume upload failure doesn't block profile creation since resume is optional
+        navigate('/dashboard');
       } catch (apiError) {
-        // Re-throw the error - no mock mode fallback
+        // Handle network errors
+        if (apiError instanceof TypeError && apiError.message === 'Failed to fetch') {
+          throw new Error('Unable to connect to server. Please check if the backend is running on port 8080 and try again.');
+        }
+        // Re-throw other errors to be caught by outer catch block
         throw apiError;
       }
-
-      // Redirect to dashboard
-      navigate('/dashboard');
       
     } catch (error) {
-      setGeneralError(error.message || 'Failed to create profile. Please try again.');
+      // Set user-friendly error message
+      const errorMessage = error.message || 'Failed to create profile. Please try again.';
+      setGeneralError(errorMessage);
       console.error('Profile creation error:', error);
+      
+      // Log additional debugging info
+      if (error.message.includes('Failed to fetch') || error.message.includes('Unable to connect')) {
+        console.error('Backend connection error. Please check:');
+        console.error('1. Backend server is running on port 8080');
+        console.error('2. Backend is accessible at http://localhost:8080');
+        console.error('3. Vite proxy is configured correctly (vite.config.js)');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -449,7 +562,7 @@ const ProfileCreation = () => {
             {/* Resume Upload */}
             <div className="profile-creation__resume">
               <label className="profile-creation__label">
-                Resume {formData.userType === 'candidate' && (<span className="input__required">*</span>)}
+                Resume <span className="profile-creation__optional">(Optional - you can upload it later)</span>
               </label>
 
               <div

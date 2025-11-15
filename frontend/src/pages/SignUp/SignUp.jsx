@@ -10,7 +10,7 @@ import {
   setUser,
   setToken,
 } from '../../store/slices/authSlice'
-import { register, isProfileComplete, getUserData } from '../../services/authService'
+import { register } from '../../services/authService'
 import { validateSignUpForm, sanitizeInput } from '../../utils/validators'
 import './SignUp.css'
 
@@ -66,15 +66,9 @@ function SignUp() {
       dispatch(setUser(res.user))
       dispatch(setToken(res.token))
       
-      // Check if user profile is complete and redirect accordingly
-      const user = getUserData()
-      if (isProfileComplete(user)) {
-        // Profile complete - redirect to dashboard
-        navigate('/dashboard')
-      } else {
-        // Profile incomplete - redirect to profile creation
-        navigate('/profile/create')
-      }
+      // After registration, always redirect to profile page
+      // Users must complete their profile before accessing the dashboard
+      navigate('/profile/create')
     } catch (err) {
       // Handle registration error - show backend validation errors if available
       if (err.response?.data) {
