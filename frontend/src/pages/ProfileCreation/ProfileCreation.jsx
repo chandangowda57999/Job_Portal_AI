@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getUserData, setUserData } from '../../services/authService';
-import { updateMockUserProfile } from '../../services/mockUsers';
-import { appConfig, shouldUseMockMode } from '../../config/appConfig';
 import './ProfileCreation.css';
 
 /**
@@ -157,17 +155,7 @@ const ProfileCreation = () => {
         resumeSource: 'api',
       };
     } catch (apiError) {
-      // Fallback to mock: store minimal metadata and an object URL (session-only)
-      if (shouldUseMockMode(apiError) && appConfig.ENABLE_MOCK_MODE) {
-        const objectUrl = URL.createObjectURL(resumeFile);
-        return {
-          resumeId: `mock_resume_${Date.now()}`,
-          resumeUrl: objectUrl,
-          resumeFileName: resumeFile.name,
-          resumeFileSize: resumeFile.size,
-          resumeSource: 'mock',
-        };
-      }
+      // Re-throw the error - no mock mode fallback
       throw apiError;
     } finally {
       setIsUploading(false);
@@ -176,7 +164,7 @@ const ProfileCreation = () => {
 
   /**
    * Handles form submission
-   * Uses mock mode (local storage) if backend is unavailable
+   * Submits profile data to the backend API
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -254,30 +242,8 @@ const ProfileCreation = () => {
         setUserData(updatedUser);
         console.log('✅ Profile updated via API');
       } catch (apiError) {
-        // Check if mock mode should be used (only if enabled in config)
-        if (shouldUseMockMode(apiError) && appConfig.ENABLE_MOCK_MODE) {
-          console.warn('⚠️ Backend unavailable, using mock mode for profile update');
-          
-          // Update in mock users database if user exists there
-          const updatedMockUser = updateMockUserProfile(currentUser.email, {
-            firstName: formData.firstName.trim(),
-            lastName: formData.lastName.trim(),
-            phoneCountryCode: formData.phoneCountryCode,
-            phoneNumber: formData.phoneNumber.trim(),
-            userType: formData.userType,
-            resume: updatedUserData.resume || undefined,
-          });
-          
-          // Use updated mock user if available, otherwise use local data
-          const finalUserData = updatedMockUser || updatedUserData;
-          setUserData(finalUserData);
-          
-          console.log('🔧 Mock Mode: Profile saved to mock database');
-          console.log(`   Profile Status: ${finalUserData.profileComplete ? 'Complete' : 'Incomplete'}`);
-        } else {
-          // Mock mode disabled or real API error - rethrow
-          throw apiError;
-        }
+        // Re-throw the error - no mock mode fallback
+        throw apiError;
       }
 
       // Redirect to dashboard

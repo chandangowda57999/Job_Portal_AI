@@ -2,24 +2,14 @@ import axios from 'axios';
 import {
   API_BASE_URL,
   API_ENDPOINTS,
-  GOOGLE_OAUTH,
-  LINKEDIN_OAUTH,
   STORAGE_KEYS,
   UI_CONSTANTS
 } from '../utils/constants';
-import { appConfig, shouldUseMockMode } from '../config/appConfig';
-import {
-  findMockUserByEmail,
-  createMockUser,
-  updateMockUserProfile,
-  authenticateMockUser,
-  getMockToken,
-  printTestCredentials,
-} from './mockUsers';
+// Mock mode removed - using real API only
 
 /**
  * Authentication Service
- * Handles all authentication-related operations including OAuth and traditional login
+ * Handles all authentication-related operations
  */
 
 /**
@@ -123,63 +113,11 @@ export const isAuthenticated = () => {
   return !!getAuthToken();
 };
 
-/**
- * Mock login using mock users database (for testing without backend)
- * Checks mock users database and local storage for user authentication
- * 
- * @param {Object} credentials - Login credentials
- * @param {string} credentials.email - User's email address
- * @param {string} credentials.password - User's password
- * @returns {Promise<Object>} Promise resolving to user data and mock token
- * @throws {Error} If user not found or credentials invalid
- */
-const mockLogin = async ({ email, password }) => {
-  // First, check mock users database for predefined test users
-  const mockUser = authenticateMockUser(email, password);
-  
-  if (mockUser) {
-    // User found in mock database
-    const mockToken = getMockToken(mockUser.id);
-    setAuthToken(mockToken);
-    setUserData(mockUser);
-    
-    console.log('🔧 Mock Mode: User logged in from mock database');
-    console.log(`   Email: ${mockUser.email}`);
-    console.log(`   Profile Complete: ${mockUser.profileComplete ? 'Yes' : 'No'}`);
-    
-    return {
-      success: true,
-      message: UI_CONSTANTS.SUCCESS_MESSAGES.LOGIN,
-      user: mockUser,
-      token: mockToken,
-    };
-  }
-  
-  // Fallback: Check local storage for newly created users
-  const storedUser = getUserData();
-  
-  if (storedUser && storedUser.email.toLowerCase() === email.toLowerCase()) {
-    // User found in local storage (from previous signup)
-    const mockToken = getAuthToken() || getMockToken(storedUser.id);
-    setAuthToken(mockToken);
-    
-    console.log('🔧 Mock Mode: User logged in from local storage');
-    
-    return {
-      success: true,
-      message: UI_CONSTANTS.SUCCESS_MESSAGES.LOGIN,
-      user: storedUser,
-      token: mockToken,
-    };
-  }
-  
-  throw new Error('Invalid email or password. Use test credentials or sign up first.');
-};
+// Mock login function removed - using real API only
 
 /**
  * Traditional email/password login
  * Sends credentials to backend and stores received token
- * Falls back to mock mode if backend is unavailable
  * 
  * @param {Object} credentials - Login credentials
  * @param {string} credentials.email - User's email address
@@ -220,67 +158,30 @@ export const login = async ({ email, password, rememberMe = false }) => {
       token,
     };
   } catch (error) {
-    // Check if mock mode should be used (only if enabled in config)
-    if (shouldUseMockMode(error)) {
-      console.warn('⚠️ Backend unavailable, using mock mode for login');
-      const result = await mockLogin({ email, password });
-      if (rememberMe) {
-        localStorage.setItem(STORAGE_KEYS.REMEMBER_ME, 'true');
-      }
-      return result;
+    // Preserve the error object to access response data
+    if (error.response) {
+      // Backend returned an error response
+      // For login, always return generic message for security
+      const errorMessage = error.response.data?.message || 
+                          error.response.data?.error ||
+                          UI_CONSTANTS.ERROR_MESSAGES.INVALID_CREDENTIALS;
+      const apiError = new Error(errorMessage);
+      apiError.response = error.response; // Preserve response for detailed error handling
+      throw apiError;
     }
-    // If mock mode is disabled or it's a real API error, throw the error
+    // Network or other errors
     throw new Error(
-      error.response?.data?.message ||
-      UI_CONSTANTS.ERROR_MESSAGES.INVALID_CREDENTIALS
+      error.message ||
+      UI_CONSTANTS.ERROR_MESSAGES.NETWORK_ERROR
     );
   }
 };
 
-/**
- * Mock registration using mock users database (for testing without backend)
- * Creates a new user account in mock database and local storage
- * 
- * @param {Object} userData - Registration data
- * @param {string} userData.email - User's email address
- * @param {string} userData.name - User's full name
- * @param {string} userData.password - User's password
- * @returns {Promise<Object>} Promise resolving to user data and mock token
- * @throws {Error} If email already exists
- */
-const mockRegister = async (userData) => {
-  // Check if user already exists
-  const existingUser = findMockUserByEmail(userData.email);
-  
-  if (existingUser) {
-    throw new Error('Email already registered. Please sign in instead.');
-  }
-  
-  // Create new user in mock database
-  const user = createMockUser(userData);
-  const mockToken = getMockToken(user.id);
-  
-  // Store in local storage for persistence
-  setAuthToken(mockToken);
-  setUserData(user);
-
-  console.log('🔧 Mock Mode: New user registered');
-  console.log(`   Email: ${user.email}`);
-  console.log(`   Name: ${user.name}`);
-  console.log(`   Profile Status: Incomplete (will redirect to profile creation)`);
-
-  return {
-    success: true,
-    message: UI_CONSTANTS.SUCCESS_MESSAGES.REGISTER,
-    user,
-    token: mockToken,
-  };
-};
+// Mock registration function removed - using real API only
 
 /**
  * User registration
  * Creates a new user account with provided credentials
- * Falls back to mock mode if backend is unavailable
  * 
  * @param {Object} userData - Registration data
  * @param {string} userData.email - User's email address
@@ -317,15 +218,20 @@ export const register = async (userData) => {
       token,
     };
   } catch (error) {
-    // Check if mock mode should be used (only if enabled in config)
-    if (shouldUseMockMode(error)) {
-      console.warn('⚠️ Backend unavailable, using mock mode for registration');
-      return await mockRegister(userData);
+    // Preserve the error object to access response data
+    if (error.response) {
+      // Backend returned an error response
+      const errorMessage = error.response.data?.message || 
+                          error.response.data?.error ||
+                          UI_CONSTANTS.ERROR_MESSAGES.SERVER_ERROR;
+      const apiError = new Error(errorMessage);
+      apiError.response = error.response; // Preserve response for detailed error handling
+      throw apiError;
     }
-    // If mock mode is disabled or it's a real API error, throw the error
+    // Network or other errors
     throw new Error(
-      error.response?.data?.message ||
-      UI_CONSTANTS.ERROR_MESSAGES.SERVER_ERROR
+      error.message ||
+      UI_CONSTANTS.ERROR_MESSAGES.NETWORK_ERROR
     );
   }
 };
@@ -350,142 +256,6 @@ export const logout = async () => {
       success: true,
       message: UI_CONSTANTS.SUCCESS_MESSAGES.LOGOUT,
     };
-  }
-};
-
-/**
- * Initiates Google OAuth flow
- * Redirects user to Google's authentication page
- * 
- * @example
- * // Redirect to Google OAuth
- * initiateGoogleLogin();
- */
-export const initiateGoogleLogin = () => {
-  // Construct Google OAuth URL
-  const params = new URLSearchParams({
-    client_id: GOOGLE_OAUTH.CLIENT_ID,
-    redirect_uri: GOOGLE_OAUTH.REDIRECT_URI,
-    response_type: 'code',
-    scope: GOOGLE_OAUTH.SCOPE,
-    access_type: 'offline',
-    prompt: 'consent',
-  });
-
-  const authUrl = `${GOOGLE_OAUTH.AUTH_URL}?${params.toString()}`;
-  
-  // Redirect to Google's OAuth page
-  window.location.href = authUrl;
-};
-
-/**
- * Handles Google OAuth callback
- * Exchanges authorization code for access token and user data
- * 
- * @param {string} code - Authorization code from Google OAuth
- * @returns {Promise<Object>} Promise resolving to user data and token
- * @throws {Error} If OAuth callback handling fails
- * 
- * @example
- * // In callback component
- * const code = new URLSearchParams(window.location.search).get('code');
- * try {
- *   const response = await handleGoogleCallback(code);
- * } catch (error) {
- *   console.error('Google auth failed:', error);
- * }
- */
-export const handleGoogleCallback = async (code) => {
-  try {
-    const response = await apiClient.post(API_ENDPOINTS.AUTH.GOOGLE_CALLBACK, {
-      code,
-      redirect_uri: GOOGLE_OAUTH.REDIRECT_URI,
-    });
-
-    const { token, user } = response.data;
-
-    // Store authentication data
-    setAuthToken(token);
-    setUserData(user);
-
-    return {
-      success: true,
-      message: UI_CONSTANTS.SUCCESS_MESSAGES.LOGIN,
-      user,
-      token,
-    };
-  } catch (error) {
-    throw new Error(
-      error.response?.data?.message ||
-      UI_CONSTANTS.ERROR_MESSAGES.OAUTH_FAILED
-    );
-  }
-};
-
-/**
- * Initiates LinkedIn OAuth flow
- * Redirects user to LinkedIn's authentication page
- * 
- * @example
- * // Redirect to LinkedIn OAuth
- * initiateLinkedInLogin();
- */
-export const initiateLinkedInLogin = () => {
-  // Construct LinkedIn OAuth URL
-  const params = new URLSearchParams({
-    client_id: LINKEDIN_OAUTH.CLIENT_ID,
-    redirect_uri: LINKEDIN_OAUTH.REDIRECT_URI,
-    response_type: 'code',
-    scope: LINKEDIN_OAUTH.SCOPE,
-  });
-
-  const authUrl = `${LINKEDIN_OAUTH.AUTH_URL}?${params.toString()}`;
-  
-  // Redirect to LinkedIn's OAuth page
-  window.location.href = authUrl;
-};
-
-/**
- * Handles LinkedIn OAuth callback
- * Exchanges authorization code for access token and user data
- * 
- * @param {string} code - Authorization code from LinkedIn OAuth
- * @returns {Promise<Object>} Promise resolving to user data and token
- * @throws {Error} If OAuth callback handling fails
- * 
- * @example
- * // In callback component
- * const code = new URLSearchParams(window.location.search).get('code');
- * try {
- *   const response = await handleLinkedInCallback(code);
- * } catch (error) {
- *   console.error('LinkedIn auth failed:', error);
- * }
- */
-export const handleLinkedInCallback = async (code) => {
-  try {
-    const response = await apiClient.post(API_ENDPOINTS.AUTH.LINKEDIN_CALLBACK, {
-      code,
-      redirect_uri: LINKEDIN_OAUTH.REDIRECT_URI,
-    });
-
-    const { token, user } = response.data;
-
-    // Store authentication data
-    setAuthToken(token);
-    setUserData(user);
-
-    return {
-      success: true,
-      message: UI_CONSTANTS.SUCCESS_MESSAGES.LOGIN,
-      user,
-      token,
-    };
-  } catch (error) {
-    throw new Error(
-      error.response?.data?.message ||
-      UI_CONSTANTS.ERROR_MESSAGES.OAUTH_FAILED
-    );
   }
 };
 

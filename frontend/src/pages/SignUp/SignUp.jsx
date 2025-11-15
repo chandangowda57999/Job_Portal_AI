@@ -10,7 +10,7 @@ import {
   setUser,
   setToken,
 } from '../../store/slices/authSlice'
-import { register } from '../../services/authService'
+import { register, isProfileComplete, getUserData } from '../../services/authService'
 import { validateSignUpForm, sanitizeInput } from '../../utils/validators'
 import './SignUp.css'
 
@@ -66,10 +66,47 @@ function SignUp() {
       dispatch(setUser(res.user))
       dispatch(setToken(res.token))
       
-      // Redirect to profile creation after successful registration
-      navigate('/profile/create')
+      // Check if user profile is complete and redirect accordingly
+      const user = getUserData()
+      if (isProfileComplete(user)) {
+        // Profile complete - redirect to dashboard
+        navigate('/dashboard')
+      } else {
+        // Profile incomplete - redirect to profile creation
+        navigate('/profile/create')
+      }
     } catch (err) {
-      dispatch(setSignUpGeneralError(err.message || 'Failed to sign up. Please try again.'))
+      // Handle registration error - show backend validation errors if available
+      if (err.response?.data) {
+        const errorData = err.response.data
+        
+        // Check if there are field-specific validation errors
+        if (errorData.errors && typeof errorData.errors === 'object') {
+          // Map backend field errors to form errors
+          const fieldErrors = {}
+          Object.keys(errorData.errors).forEach(field => {
+            // Map backend field names to frontend field names if needed
+            const frontendField = field === 'name' ? 'name' : 
+                                 field === 'email' ? 'email' : 
+                                 field === 'password' ? 'password' : field
+            fieldErrors[frontendField] = errorData.errors[field]
+          })
+          dispatch(setSignUpErrors(fieldErrors))
+          
+          // Also show general error message if available
+          if (errorData.message) {
+            dispatch(setSignUpGeneralError(errorData.message))
+          }
+        } else {
+          // General error message
+          const errorMessage = errorData.message || err.message || 'Failed to sign up. Please try again.'
+          dispatch(setSignUpGeneralError(errorMessage))
+        }
+      } else {
+        // Network or other errors
+        dispatch(setSignUpGeneralError(err.message || 'Failed to sign up. Please try again.'))
+      }
+      console.error('Registration error:', err)
     } finally {
       dispatch(setSignUpLoading(false))
     }
@@ -109,7 +146,6 @@ function SignUp() {
                   className={`input__field ${signUpForm.errors.name ? 'input__field--error' : ''}`}
                 />
                 <label htmlFor="name" className="input__label">Full Name<span className="input__required">*</span></label>
-                <div className="input__focus-line"></div>
               </div>
               {signUpForm.errors.name && <p className="input__error" role="alert">{signUpForm.errors.name}</p>}
             </div>
@@ -128,7 +164,6 @@ function SignUp() {
                   autoComplete="email"
                 />
                 <label htmlFor="email" className="input__label">Email Address<span className="input__required">*</span></label>
-                <div className="input__focus-line"></div>
               </div>
               {signUpForm.errors.email && <p className="input__error" role="alert">{signUpForm.errors.email}</p>}
             </div>
@@ -156,7 +191,6 @@ function SignUp() {
                 >
                   {signUpForm.showPassword ? '🔒' : '👁️‍🗨️'}
                 </button>
-                <div className="input__focus-line"></div>
               </div>
               {signUpForm.errors.password && <p className="input__error" role="alert">{signUpForm.errors.password}</p>}
             </div>
@@ -175,7 +209,6 @@ function SignUp() {
                   autoComplete="new-password"
                 />
                 <label htmlFor="confirmPassword" className="input__label">Confirm Password<span className="input__required">*</span></label>
-                <div className="input__focus-line"></div>
               </div>
               {signUpForm.errors.confirmPassword && <p className="input__error" role="alert">{signUpForm.errors.confirmPassword}</p>}
             </div>
