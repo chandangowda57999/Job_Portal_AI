@@ -279,7 +279,11 @@ export const getUserProfile = async () => {
 
 /**
  * Checks if user profile is complete
- * Profile is considered complete if firstName, lastName, and userType are set
+ * Profile is considered complete only after user has visited the profile creation page
+ * This requires: firstName, lastName, userType, and phoneNumber (or phoneCountryCode)
+ * 
+ * Note: During registration, only firstName, lastName, and userType are set.
+ * Phone number/phoneCountryCode are only set when user visits profile creation page.
  * 
  * @param {Object} user - User object from storage or API
  * @returns {boolean} True if profile is complete, false otherwise
@@ -292,7 +296,14 @@ export const isProfileComplete = (user) => {
   const hasLastName = user.lastName && user.lastName.trim().length > 0;
   const hasUserType = user.userType && user.userType.trim().length > 0;
   
-  return hasFirstName && hasLastName && hasUserType;
+  // Check if profile has been created (phone number or phone country code indicates profile creation)
+  // During registration, these fields are NOT set, so this ensures user has visited profile page
+  const hasPhoneNumber = user.phoneNumber && user.phoneNumber.trim().length > 0;
+  const hasPhoneCountryCode = user.phoneCountryCode && user.phoneCountryCode.trim().length > 0;
+  const hasProfileCreated = hasPhoneNumber || hasPhoneCountryCode;
+  
+  // Profile is complete only if all basic fields exist AND user has visited profile creation page
+  return hasFirstName && hasLastName && hasUserType && hasProfileCreated;
 };
 
 /**

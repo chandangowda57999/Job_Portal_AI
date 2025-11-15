@@ -51,9 +51,10 @@ public class UserService {
     @Transactional
     public UserDTO create(UserDTO userDto) {
         // Ensure lastName is not null (database constraint requires it)
+        // If lastName is not provided, set to empty string (not firstName)
         if (userDto.getLastName() == null || userDto.getLastName().trim().isEmpty()) {
-            // If lastName is not provided, use firstName as lastName to satisfy database constraint
-            userDto.setLastName(userDto.getFirstName() != null ? userDto.getFirstName() : "");
+            // Database requires non-null, so we use empty string instead of duplicating firstName
+            userDto.setLastName("");
         }
         
         User entity = userMapper.toEntity(userDto);
