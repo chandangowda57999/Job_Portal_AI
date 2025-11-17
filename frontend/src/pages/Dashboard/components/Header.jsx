@@ -2,10 +2,11 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { setSearchQuery } from '../../../store/slices/dashboardSlice'
+import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 
 /**
  * Header
- * Dashboard top bar: logo/title, search box, and profile placeholder.
+ * Dashboard top bar with navigation (logo, user, logout) and search box.
  * Uses Redux for search query state.
  */
 function Header() {
@@ -18,28 +19,27 @@ function Header() {
   }
 
   return (
-    <div className="dash__section">
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '1rem', alignItems: 'center' }}>
-        <div style={{ display: 'grid', gap: '0.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div className="gradient-text" style={{ fontWeight: 800, fontSize: '1.25rem' }}>JobPortal AI</div>
-          </div>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <input
-              value={searchQuery}
-              onChange={(e) => dispatch(setSearchQuery(e.target.value))}
-              className="apps__input"
-              placeholder="Search jobs, skills, or location..."
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-            />
-            <button className="button button--primary button--medium" onClick={handleSearch}>Search</button>
-          </div>
-        </div>
-        <div className="hidden-mobile" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'white', border: '2px solid var(--gray-200)' }}></div>
+    <>
+      {/* Navigation Bar - Separate div */}
+      <div className="dash__section">
+        <NavigationBar />
+      </div>
+
+      {/* Search Bar - Separate div */}
+      <div className="dash__section">
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <input
+            value={searchQuery}
+            onChange={(e) => dispatch(setSearchQuery(e.target.value))}
+            className="apps__input"
+            placeholder="Search jobs, skills, or location..."
+            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+            style={{ flex: 1 }}
+          />
+          <button className="button button--primary button--medium" onClick={handleSearch}>Search</button>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 

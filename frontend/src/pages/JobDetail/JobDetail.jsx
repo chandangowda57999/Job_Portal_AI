@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { setActiveTab, setCurrentJob, resetJobDetail, setLoading, setError } from '../../store/slices/jobDetailSlice'
 import { fetchJobDetail } from '../../services/dashboardService'
+import NavigationBar from '../../components/NavigationBar/NavigationBar'
 import JobHeader from './components/JobHeader'
 import JobSections from './components/JobSections'
 import JobSidebar from './components/JobSidebar'
@@ -106,7 +107,11 @@ function JobDetail() {
         }
       } catch (err) {
         console.error('Error loading job detail:', err)
-        dispatch(setError(err.message || 'Failed to load job details. Please try again later.'))
+        // Extract error message - could be from axios or regular Error
+        const errorMessage = err.response?.data?.message || 
+                           err.message || 
+                           'Failed to load job details. Please try again later.'
+        dispatch(setError(errorMessage))
       } finally {
         dispatch(setLoading(false))
       }
@@ -203,6 +208,10 @@ function JobDetail() {
       </div>
 
       <div className="jobdetail__container">
+        {/* Navigation Bar */}
+        <div className="jobdetail__nav-section">
+          <NavigationBar />
+        </div>
         {/* Loading state */}
         {loading && (
           <div style={{ textAlign: 'center', padding: '4rem' }}>

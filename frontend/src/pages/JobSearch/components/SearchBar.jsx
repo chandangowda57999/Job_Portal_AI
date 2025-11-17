@@ -1,6 +1,7 @@
 import React from 'react'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { setQuery } from '../../../store/slices/jobSearchSlice'
+import NavigationBar from '../../../components/NavigationBar/NavigationBar'
 
 /**
  * SearchBar
@@ -12,17 +13,25 @@ function SearchBar() {
   const { query } = useAppSelector((state) => state.jobSearch)
 
   return (
-    <div className="searchp__section">
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.75rem' }}>
-        <input
-          className="apps__input"
-          placeholder="Search roles, skills, location..."
-          value={query}
-          onChange={(e) => dispatch(setQuery(e.target.value))}
-        />
-        <button className="button button--primary button--medium">Go</button>
+    <>
+      {/* Navigation Bar - Separate div */}
+      <div className="searchp__section">
+        <NavigationBar />
       </div>
-    </div>
+      
+      {/* Search Bar - Separate div */}
+      <div className="searchp__section">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.75rem' }}>
+          <input
+            className="apps__input"
+            placeholder="Search roles, skills, location..."
+            value={query}
+            onChange={(e) => dispatch(setQuery(e.target.value))}
+          />
+          <button className="button button--primary button--medium">Go</button>
+        </div>
+      </div>
+    </>
   )
 }
 
