@@ -1,0 +1,26 @@
+{
+  "title": "Senior Software Engineer",
+  "company": "Tech Corp",
+  "location": "San Francisco, CA",
+  "jobType": "FULL_TIME",
+  "status": "ACTIVE",
+  "experienceLevel": "SENIOR",
+  "department": "Engineering",
+  "category": "IT",
+  "description": "We are looking for a Senior Software Engineer to join our team. You will be responsible for designing and developing scalable applications using Java and Spring Boot. This is a great opportunity to work with cutting-edge technologies and collaborate with a talented team of engineers.",
+  "requirements": "5+ years of experience in Java development\n• Strong knowledge of Spring Boot framework\n• Experience with REST API development\n• Database design and optimization skills\n• Familiarity with cloud platforms (AWS, Azure)\n• Excellent problem-solving and communication skills",
+  "responsibilities": "Design and develop scalable web applications\n• Write clean, maintainable, and well-documented code\n• Participate in code reviews and provide feedback\n• Mentor junior developers\n• Collaborate with cross-functional teams\n• Troubleshoot and debug applications",
+  "benefits": "Competitive salary and equity package\n• Health, dental, and vision insurance\n• 401(k) matching\n• Flexible work hours and remote work options\n• Professional development opportunities\n• Free snacks and beverages",
+  "salaryMin": 120000,
+  "salaryMax": 180000,
+  "salaryCurrency": "USD",
+  "workMode": "HYBRID",
+  "educationLevel": "BACHELOR",
+  "skills": "Java, Spring Boot, React, TypeScript, PostgreSQL, AWS, Docker, Kubernetes",
+  "companyInfo": "Tech Corp is a leading technology company specializing in innovative software solutions. We are committed to creating products that make a difference in people's lives. Our team is passionate about technology and continuously strives to push the boundaries of what's possible.",
+  "companyLogoUrl": "https://example.com/logo.png",
+  "postedBy": 1,
+  "applicationDeadline": "2024-12-31T23:59:59Z",
+  "startDate": "2024-01-15T09:00:00Z"
+}
+

@@ -73,6 +73,12 @@ public class JobDTO {
     @Size(max = 500, message = "Skills must not exceed 500 characters")
     private String skills;
     
+    @Size(max = 5000, message = "Company info must not exceed 5000 characters")
+    private String companyInfo; // Company description/about text
+    
+    @Size(max = 500, message = "Company logo URL must not exceed 500 characters")
+    private String companyLogoUrl; // URL to company logo image
+    
     @NotNull(message = "Posted by user ID is required")
     private Long postedBy;
     

@@ -13,6 +13,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./seed-data.sql:/docker-entrypoint-initdb.d/seed-data.sql
     networks:
       - jobportal-network
 

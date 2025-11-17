@@ -182,24 +182,74 @@
 /* Layout */
 .jobdetail__body {
   display: grid;
-  grid-template-columns: 1.3fr 0.7fr;
+  grid-template-columns: 1fr 400px;
   gap: var(--space-6);
+  align-items: start;
 }
 
-.jobdetail__body--full-width {
-  grid-template-columns: 1fr;
+.jobdetail__main-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
 }
 
 .jobdetail__main {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: 0;
+  position: relative;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-lg);
 }
 
+/* Scroll Progress Bar */
+.jobdetail__scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+  width: 100%;
+}
+
+.jobdetail__scroll-progress-bar {
+  height: 100%;
+  background: var(--gradient-primary);
+  transition: width 0.1s ease-out;
+  box-shadow: 0 0 10px rgba(var(--primary-500-rgb), 0.5);
+}
+
+/* Tabs Container */
+.jobdetail__tabs-container {
+  position: sticky;
+  top: 4px; /* Offset for scroll progress bar */
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  margin: 0 calc(-1 * var(--space-4));
+  padding: 0 var(--space-4);
+  border-bottom: 2px solid var(--gray-100);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Sticky Tabs */
 .jobdetail__tabs {
   display: flex;
   gap: var(--space-2);
-  border-bottom: 2px solid var(--gray-100);
+  padding: var(--space-2) 0;
+}
+
+.jobdetail__tabs--sticky {
+  /* Sticky positioning handled by container */
 }
 
 .jobdetail__tab {
@@ -209,19 +259,48 @@
   font-weight: var(--font-semibold);
   color: var(--gray-600);
   cursor: pointer;
-  transition: all var(--transition-base);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  border-radius: var(--radius-md);
 }
 
 .jobdetail__tab:hover:not(.jobdetail__tab--active) {
   color: var(--primary-500);
   background: var(--primary-50);
-  border-radius: var(--radius-md);
+  transform: translateY(-1px);
+}
+
+.jobdetail__tab-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.jobdetail__tab-active-indicator {
+  display: inline-block;
+  color: var(--primary-500);
+  font-size: 0.8em;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
 }
 
 .jobdetail__tab--active {
-  color: var(--primary-600);
-  position: relative;
+  color: var(--primary-700);
+  background: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%);
+  border: 2px solid var(--primary-300);
+  box-shadow: 0 2px 8px rgba(var(--primary-500-rgb), 0.2),
+              0 4px 12px rgba(var(--primary-500-rgb), 0.1);
+  transform: translateY(-2px) scale(1.02);
 }
 
 .jobdetail__tab--active::after {
@@ -233,6 +312,48 @@
   height: 3px;
   background: var(--gradient-primary);
   border-radius: var(--radius-full);
+  box-shadow: 0 0 8px rgba(var(--primary-500-rgb), 0.5);
+}
+
+/* Sections Container - All sections in single scrollable page */
+.jobdetail__sections-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-top: var(--space-4);
+  scroll-behavior: smooth;
+}
+
+/* Scroll Section - Each section that can be scrolled to */
+.jobdetail__scroll-section {
+  scroll-margin-top: 120px; /* Offset for sticky tabs and scroll progress */
+  padding: var(--space-6);
+  border-bottom: 1px solid var(--gray-100);
+  opacity: 1;
+  animation: fadeInUp 0.5s ease-out;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  min-height: 200px; /* Ensure sections have minimum height for better detection */
+  background: transparent;
+}
+
+.jobdetail__scroll-section:last-child {
+  border-bottom: none;
+}
+
+.jobdetail__scroll-section:first-of-type {
+  padding-top: var(--space-6);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .jobdetail__section {
@@ -270,17 +391,51 @@
   border-radius: var(--radius-full);
 }
 
-.jobdetail__aside {
+/* Sidebar - Right Column */
+.jobdetail__sidebar {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  width: 100%;
+  min-width: 0; /* Prevent grid overflow */
 }
 
-.jobdetail__card {}
+.jobdetail__sidebar-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.jobdetail__sidebar--sticky {
+  position: sticky;
+  top: 120px; /* Offset for sticky tabs and scroll progress */
+  align-self: start;
+  width: 100%;
+  height: auto; /* Allow content to define height */
+  max-height: none; /* Remove max-height constraint */
+  overflow: visible; /* Allow content to overflow if needed, no internal scroll */
+}
+
+.jobdetail__card {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-md);
+}
 
 .jobdetail__aside-title {
   font-weight: var(--font-bold);
-  margin-bottom: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 2px solid var(--gray-100);
+  font-size: var(--text-lg);
+  color: var(--gray-800);
 }
 
 .jobdetail__factors {
@@ -288,17 +443,34 @@
   gap: var(--space-3);
 }
 
-.jobdetail__factor {}
+.jobdetail__factor {
+  padding: var(--space-3);
+  border: 1px solid var(--gray-100);
+  border-radius: var(--radius-md);
+  background: white;
+}
 
 .jobdetail__factor-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: var(--space-2);
+  gap: var(--space-2);
+}
+
+.jobdetail__factor-row > span:first-child {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .jobdetail__factor-score {
   font-weight: var(--font-semibold);
+  color: var(--primary-600);
+  min-width: fit-content;
+  flex-shrink: 0;
 }
 
 .jobdetail__bar {
@@ -333,37 +505,96 @@
   gap: var(--space-2);
 }
 
-.jobdetail__similar li {
+.jobdetail__similar-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: var(--space-3);
-  border: 2px solid var(--gray-100);
+  border: 1px solid var(--gray-100);
   border-radius: var(--radius-md);
   background: white;
+  gap: var(--space-3);
+  transition: all 0.2s ease;
+}
+
+.jobdetail__similar-item:hover {
+  border-color: var(--primary-300);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.jobdetail__similar-item > div:first-child {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .jobdetail__similar-title {
   font-weight: var(--font-semibold);
+  margin-bottom: var(--space-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .jobdetail__similar-sub {
   color: var(--gray-600);
   font-size: var(--text-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .jobdetail__similar-fit {
   background: var(--gradient-success);
   color: white;
   border-radius: var(--radius-full);
-  padding: 2px 10px;
+  padding: 4px 12px;
   font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
   box-shadow: var(--shadow-success);
+  min-width: fit-content;
+  flex-shrink: 0;
 }
 
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Responsive Design */
 @media (max-width: 1024px) {
   .jobdetail__body {
     grid-template-columns: 1fr;
+  }
+  
+  .jobdetail__tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  .jobdetail__tabs::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+  
+  .jobdetail__body {
+    grid-template-columns: 1fr;
+  }
+  
+  .jobdetail__sidebar--sticky {
+    position: relative;
+    top: 0;
+  }
+  
+  .jobdetail__scroll-section {
+    scroll-margin-top: 100px;
+    min-height: 200px;
+  }
+  
+  .jobdetail__tabs-container {
+    top: 0;
   }
 }
 

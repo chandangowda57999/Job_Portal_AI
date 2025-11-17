@@ -67,8 +67,15 @@ public class Job {
     @Column(length = 100)
     private String educationLevel; // HIGH_SCHOOL, BACHELOR, MASTER, PHD
 
-    @Column(length = 100)
+    @Column(length = 500)
     private String skills; // Comma-separated skills
+
+    @Lob
+    @Column(name = "company_info")
+    private String companyInfo; // Company description/about text
+
+    @Column(name = "company_logo_url", length = 500)
+    private String companyLogoUrl; // URL to company logo image
 
     @Column(name = "posted_by")
     private Long postedBy; // Foreign key to User entity (employer)

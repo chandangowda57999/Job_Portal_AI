@@ -1,12 +1,12 @@
-import React, { useMemo, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import { setActiveTab, setCurrentJob, resetJobDetail } from '../../store/slices/jobDetailSlice'
+import { setActiveTab, setCurrentJob, resetJobDetail, setLoading, setError } from '../../store/slices/jobDetailSlice'
+import { fetchJobDetail } from '../../services/dashboardService'
 import JobHeader from './components/JobHeader'
 import JobSections from './components/JobSections'
-import ResumeMatch from './components/ResumeMatch'
-import CompanyAbout from './components/CompanyAbout'
-import SimilarJobs from './components/SimilarJobs'
+import JobSidebar from './components/JobSidebar'
+import ScrollProgress from './components/ScrollProgress'
 import './JobDetail.css'
 
 /**
@@ -55,131 +55,96 @@ function JobDetail() {
   const dispatch = useAppDispatch()
   
   /**
-   * Get active tab and current job from Redux store
+   * Get active tab, current job, loading, and error from Redux store
    * @type {Object}
    * @property {string} activeTab - Currently active tab ('Description', 'Requirements', etc.)
    * @property {Object|null} currentJob - Current job data object or null
+   * @property {boolean} loading - Loading state
+   * @property {string|null} error - Error message or null
    */
-  const { activeTab, currentJob } = useAppSelector((state) => state.jobDetail)
+  const { activeTab, currentJob, loading, error } = useAppSelector((state) => state.jobDetail)
 
-  // ============================================
-  // Mock Data (Temporary - Replace with API)
-  // ============================================
-  
-  /**
-   * Mock job data for demonstration purposes
-   * 
-   * This should be replaced with an API call to fetch actual job details.
-   * The structure matches the expected job data schema.
-   * 
-   * @type {Object}
-   * @property {string} id - Unique job identifier
-   * @property {Object} company - Company information
-   * @property {string} company.name - Company name
-   * @property {string} company.logoUrl - URL to company logo image
-   * @property {string} role - Job title/role name
-   * @property {string} location - Job location (e.g., "Remote • US")
-   * @property {string} compensation - Salary/compensation range
-   * @property {string} type - Employment type (Full-time, Contract, etc.)
-   * @property {string} postedAt - When the job was posted
-   * @property {string[]} keywords - Array of relevant keywords extracted from JD
-   * @property {string} description - Full job description
-   * @property {string[]} requirements - Array of required skills/experience
-   * @property {string} companyInfo - Company description/about text
-   * @property {Object[]} similarJobs - Array of similar job opportunities
-   * @property {number} matchScore - AI-calculated match percentage (0-100)
-   * @property {Object[]} matchFactors - Breakdown of match score by factor
-   * @property {boolean} saved - Whether user has saved this job
-   */
-  const mockJob = useMemo(() => ({
-    id: jobId || '123',
-    role: 'Senior Frontend Engineer',
-    company: {
-      name: 'Acme Corp',
-      logoUrl: 'https://via.placeholder.com/64x64.png?text=A',
-    },
-    location: 'Remote • US',
-    compensation: '$150k–$190k + equity',
-    type: 'Full-time',
-    postedAt: '2 days ago',
-    keywords: ['React', 'TypeScript', 'GraphQL', 'Vite', 'Testing', 'Leadership'],
-    description:
-      'We are looking for a Senior Frontend Engineer to build delightful user experiences. You will work closely with design and product to ship high-impact features with strong attention to performance, accessibility, and quality.',
-    requirements: [
-      '5+ years building modern web applications',
-      'Expertise with React and TypeScript',
-      'Experience with testing frameworks (Jest, Testing Library)',
-      'Strong understanding of accessibility and performance',
-    ],
-    companyInfo:
-      'Acme Corp builds AI-powered tools for job seekers and recruiters with a focus on explainable recommendations and delightful UX.',
-    similarJobs: [
-      { id: '201', title: 'Staff Frontend Engineer', company: 'Globex', match: 82 },
-      { id: '202', title: 'Senior UI Engineer', company: 'Initech', match: 79 },
-    ],
-    matchScore: 88,
-    matchFactors: [
-      { label: 'React', weight: 0.25, score: 1 },
-      { label: 'TypeScript', weight: 0.2, score: 0.9 },
-      { label: 'GraphQL', weight: 0.15, score: 0.8 },
-      { label: 'Testing', weight: 0.15, score: 0.85 },
-      { label: 'Accessibility', weight: 0.1, score: 0.9 },
-      { label: 'Leadership', weight: 0.15, score: 0.6 },
-    ],
-    saved: false,
-  }), [jobId])
 
   // ============================================
   // Side Effects
   // ============================================
   
   /**
-   * Initialize job data in Redux store when component mounts or jobId changes
+   * Fetch job detail from API when component mounts or jobId changes
    * 
    * This effect:
-   * 1. Dispatches the mock job data to Redux store when component mounts
-   * 2. Resets the job detail state when component unmounts (cleanup)
-   * 
-   * @todo Replace with API call: fetchJobDetails(jobId).then(setCurrentJob)
+   * 1. Fetches job detail from backend API
+   * 2. Updates Redux store with job data
+   * 3. Sets loading and error states
+   * 4. Resets state when component unmounts (cleanup)
    * 
    * @effect
-   * @dependencies {dispatch, jobId, mockJob} - Re-runs when jobId changes or component mounts
+   * @dependencies {dispatch, jobId} - Re-runs when jobId changes or component mounts
    */
   useEffect(() => {
-    // Set current job in Redux store
-    dispatch(setCurrentJob(mockJob))
+    // Only fetch if jobId is provided
+    if (!jobId) {
+      dispatch(setError('Job ID is required'))
+      return
+    }
+
+    const loadJobDetail = async () => {
+      try {
+        dispatch(setLoading(true))
+        dispatch(setError(null))
+        
+        // Fetch job detail from backend API
+        // userId is optional - can be added later for match score calculation
+        const jobDetail = await fetchJobDetail(jobId, null)
+        
+        // Set current job in Redux store
+        dispatch(setCurrentJob(jobDetail))
+        
+        // Set default active tab to Description when job loads
+        if (!activeTab) {
+          dispatch(setActiveTab('Description'))
+        }
+      } catch (err) {
+        console.error('Error loading job detail:', err)
+        dispatch(setError(err.message || 'Failed to load job details. Please try again later.'))
+      } finally {
+        dispatch(setLoading(false))
+      }
+    }
+
+    loadJobDetail()
     
     // Cleanup: Reset state when leaving the page to prevent stale data
     return () => {
       dispatch(resetJobDetail())
     }
-  }, [dispatch, jobId, mockJob])
+  }, [dispatch, jobId])
 
   // ============================================
   // Computed Values
   // ============================================
   
   /**
-   * Get current job from Redux store, fallback to mock data if not loaded
+   * Get current job from Redux store
    * 
-   * @type {Object}
+   * @type {Object|null}
    * @constant
    */
-  const job = currentJob || mockJob
+  const job = currentJob
 
   // ============================================
   // Event Handlers
   // ============================================
   
   /**
-   * Navigate back to dashboard
+   * Navigate back to previous page or search page
    * Called when user clicks the "Back" button in the job header
    * 
    * @function onBack
    * @returns {void}
    */
   const onBack = () => {
-    navigate('/dashboard')
+    navigate(-1) // Go back to previous page (search or dashboard)
   }
   
   /**
@@ -221,21 +186,6 @@ function JobDetail() {
     alert('Saved!')
   }
   
-  /**
-   * Handle tab change in job detail sections
-   * 
-   * Updates the active tab in Redux store, which controls:
-   * - Which content is displayed in JobSections
-   * - Whether sidebar (ResumeMatch, CompanyAbout, SimilarJobs) is shown
-   * - Layout adjustments (full-width for Company/Similar Jobs tabs)
-   * 
-   * @function handleTabChange
-   * @param {string} tab - Tab name ('Description', 'Requirements', 'Company', 'Similar Jobs')
-   * @returns {void}
-   */
-  const handleTabChange = (tab) => {
-    dispatch(setActiveTab(tab))
-  }
 
   // ============================================
   // Render
@@ -243,6 +193,8 @@ function JobDetail() {
   
   return (
     <div className="jobdetail">
+      <ScrollProgress />
+      
       {/* Animated gradient background layers for visual consistency with SignIn page */}
       <div className="jobdetail__background" aria-hidden="true">
         <div className="jobdetail__background-layer jobdetail__background-layer--1"></div>
@@ -251,54 +203,76 @@ function JobDetail() {
       </div>
 
       <div className="jobdetail__container">
-        {/* Job Header Section */}
-        {/* Contains: Company logo, role title, location, compensation, match score, action buttons */}
-        {job && (
-          <JobHeader
-            onBack={onBack}
-            onSave={onSave}
-            onApply={onApply}
-          />
+        {/* Loading state */}
+        {loading && (
+          <div style={{ textAlign: 'center', padding: '4rem' }}>
+            <p>Loading job details...</p>
+          </div>
         )}
 
-        {/* Main Content Body */}
-        {/* 
-          Layout adapts based on active tab:
-          - Description/Requirements: Two-column (main content + sidebar)
-          - Company/Similar Jobs: Full-width (no sidebar)
-        */}
-        <div
-          className={`jobdetail__body ${
-            activeTab === 'Company' || activeTab === 'Similar Jobs' ? 'jobdetail__body--full-width' : ''
-          }`}
-        >
-          {/* Left Column: Main Content Area */}
-          {/* 
-            Tabbed interface displaying:
-            - Description: Job description, requirements, keywords
-            - Requirements: Detailed requirements list
-            - Company: Company information
-            - Similar Jobs: List of similar opportunities
-          */}
-          <JobSections
-            onJobClick={(id) => navigate(`/jobs/${id}`)}
-          />
+        {/* Error state */}
+        {error && !loading && (
+          <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--error)' }}>
+            <p>{error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              style={{ marginTop: '1rem', padding: '0.5rem 1rem' }}
+            >
+              Retry
+            </button>
+            <button 
+              onClick={onBack} 
+              style={{ marginTop: '1rem', marginLeft: '0.5rem', padding: '0.5rem 1rem' }}
+            >
+              Go Back
+            </button>
+          </div>
+        )}
 
-          {/* Right Column: Sidebar (Only shown on Description tab) */}
-          {/* 
-            Contains contextual information:
-            - Resume Match: Breakdown of match score factors
-            - Company About: Company description
-            - Similar Jobs: Quick list of related opportunities
-          */}
-          {activeTab === 'Description' && job && (
-            <aside className="jobdetail__aside">
-              <ResumeMatch />
-              <CompanyAbout />
-              <SimilarJobs onJobClick={(id) => navigate(`/jobs/${id}`)} />
-            </aside>
-          )}
-        </div>
+        {/* Job Detail Content */}
+        {!loading && !error && job && (
+          <>
+            {/* Job Header Section */}
+            {/* Contains: Company logo, role title, location, compensation, match score, action buttons */}
+            <JobHeader
+              onBack={onBack}
+              onSave={onSave}
+              onApply={onApply}
+            />
+
+            {/* Main Content Body */}
+            {/* 
+              Two-column layout:
+              - Left: All job sections (Description, Requirements, Company) with sticky tabs
+              - Right: Sticky sidebar with Resume Match and Similar Opportunities
+            */}
+            <div className="jobdetail__body">
+              {/* Left Column: Main Content Area */}
+              {/* 
+                Single scrollable page displaying all sections:
+                - Description: Job description, requirements, keywords
+                - Requirements: Detailed requirements list
+                - Company: Company information
+              */}
+              <div className="jobdetail__main-content">
+                <JobSections />
+              </div>
+
+              {/* Right Column: Sticky Sidebar */}
+              {/* 
+                Sticky sidebar with:
+                - Resume Match: Breakdown of match score factors with progress bars
+                - Similar Opportunities: List of similar job opportunities
+                - Remains visible while scrolling
+              */}
+              {((job.matchFactors && job.matchFactors.length > 0) || (job.similarJobs && job.similarJobs.length > 0)) && (
+                <aside className="jobdetail__sidebar jobdetail__sidebar--sticky">
+                  <JobSidebar onJobClick={(id) => navigate(`/jobs/${id}`)} />
+                </aside>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
