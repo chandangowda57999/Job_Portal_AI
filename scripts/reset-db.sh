@@ -2,7 +2,10 @@
 
 # Reset Database Script
 # This script resets the database by removing the volume and restarting MySQL
-# This will automatically run seed-data.sql when MySQL initializes
+# 
+# NOTE: Seed data is NOT loaded automatically because tables are created by 
+# Spring Boot/Hibernate, not during MySQL initialization. After running this 
+# script and starting Spring Boot, run: ./scripts/load-seed-data.sh
 
 set -e
 
@@ -15,7 +18,7 @@ docker-compose down mysql 2>/dev/null || true
 
 # Remove the database volume (WARNING: This deletes all data!)
 echo "2. Removing database volume..."
-docker volume rm jobportalai_mysql_data 2>/dev/null || echo "   Volume doesn't exist (first time setup)"
+docker volume rm jobsearchai_mysql_data 2>/dev/null || echo "   Volume doesn't exist (first time setup)"
 
 # Start MySQL container (will automatically run seed-data.sql)
 echo "3. Starting MySQL container with fresh database..."
@@ -36,12 +39,36 @@ fi
 
 # Wait a bit more for initialization
 echo "6. Waiting for database initialization..."
-sleep 5
+sleep 10
 
 # Verify seed data
 echo "7. Verifying seed data..."
-USER_COUNT=$(docker exec jobportal-mysql mysql -u jobportal_user -pjobportal_pass jobportal_db -e "SELECT COUNT(*) FROM users;" -s 2>/dev/null | tail -1)
-JOB_COUNT=$(docker exec jobportal-mysql mysql -u jobportal_user -pjobportal_pass jobportal_db -e "SELECT COUNT(*) FROM jobs;" -s 2>/dev/null | tail -1)
+# Try multiple times to get the count (database might still be initializing)
+USER_COUNT=0
+JOB_COUNT=0
+for i in 1 2 3 4 5; do
+    # Get counts using MySQL's -N flag (no column names) and -s flag (silent)
+    USER_RESULT=$(docker exec jobportal-mysql mysql -u jobportal_user -pjobportal_pass jobportal_db -e "SELECT COUNT(*) FROM users;" -s -N 2>/dev/null | xargs)
+    JOB_RESULT=$(docker exec jobportal-mysql mysql -u jobportal_user -pjobportal_pass jobportal_db -e "SELECT COUNT(*) FROM jobs;" -s -N 2>/dev/null | xargs)
+    
+    # Validate that results are numeric and assign
+    if [ -n "$USER_RESULT" ] && [ "$USER_RESULT" -eq "$USER_RESULT" ] 2>/dev/null; then
+        USER_COUNT=$USER_RESULT
+    fi
+    if [ -n "$JOB_RESULT" ] && [ "$JOB_RESULT" -eq "$JOB_RESULT" ] 2>/dev/null; then
+        JOB_COUNT=$JOB_RESULT
+    fi
+    
+    # If we got valid counts, break
+    if [ "$USER_COUNT" -ge 0 ] 2>/dev/null && [ "$JOB_COUNT" -ge 0 ] 2>/dev/null; then
+        break
+    fi
+    
+    if [ $i -lt 5 ]; then
+        echo "   Waiting for database to be ready... (attempt $i/5)"
+        sleep 3
+    fi
+done
 
 echo ""
 echo "📊 Database Status:"
@@ -49,7 +76,8 @@ echo "   Users: $USER_COUNT"
 echo "   Jobs: $JOB_COUNT"
 echo ""
 
-if [ "$USER_COUNT" -ge 2 ] && [ "$JOB_COUNT" -ge 3 ]; then
+# Check if we have valid integer values before comparing
+if [ "$USER_COUNT" -ge 2 ] 2>/dev/null && [ "$JOB_COUNT" -ge 3 ] 2>/dev/null; then
     echo "✅ Database reset successful! Seed data loaded."
     echo ""
     echo "📝 Test Users:"
@@ -63,10 +91,19 @@ if [ "$USER_COUNT" -ge 2 ] && [ "$JOB_COUNT" -ge 3 ]; then
     echo ""
     echo "🚀 Next steps:"
     echo "   1. Start your backend: mvn spring-boot:run"
-    echo "   2. Start your frontend: cd frontend && npm run dev"
-    echo "   3. Open http://localhost:8082/search to see jobs"
+    echo "   2. Wait for Spring Boot to create tables, then load seed data:"
+    echo "      ./scripts/load-seed-data.sh"
+    echo "   3. Start your frontend: cd frontend && npm run dev"
+    echo "   4. Open http://localhost:8082/search to see jobs"
 else
-    echo "⚠️  Warning: Expected 2+ users and 3+ jobs, but found $USER_COUNT users and $JOB_COUNT jobs"
-    echo "   Database may still be initializing. Wait a few seconds and check again."
+    echo "⚠️  Note: Tables are created by Spring Boot/Hibernate, not during MySQL initialization."
+    echo "   Expected 2+ users and 3+ jobs, but found $USER_COUNT users and $JOB_COUNT jobs"
+    echo ""
+    echo "   This is normal! Follow these steps:"
+    echo "   1. Start your backend: mvn spring-boot:run"
+    echo "   2. Wait for Spring Boot to start and create tables"
+    echo "   3. Run: ./scripts/load-seed-data.sh"
+    echo ""
+    echo "   You can check MySQL logs with: docker logs jobportal-mysql"
 fi
 

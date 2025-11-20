@@ -2,6 +2,7 @@ import React, { useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { setApplications, setQuery, setFilters, setSort } from '../../store/slices/applicationsSlice'
+import NavigationBar from '../../components/NavigationBar/NavigationBar'
 import './ApplicationsTracker.css'
 
 /**
@@ -50,6 +51,11 @@ function ApplicationsTracker() {
       </div>
 
       <div className="apps__container">
+        {/* Navigation Bar */}
+        <div className="apps__nav-section">
+          <NavigationBar />
+        </div>
+        
         <div className="apps__header">
           <h1 className="gradient-text">Applications</h1>
           <p className="apps__subtitle">Track and manage your job applications</p>

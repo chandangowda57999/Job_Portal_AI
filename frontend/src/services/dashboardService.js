@@ -1,4 +1,5 @@
 import { API_BASE_URL } from '../utils/constants';
+import apiClient, { getAuthToken } from './authService';
 
 /**
  * Dashboard Service
@@ -11,18 +12,9 @@ import { API_BASE_URL } from '../utils/constants';
  */
 export const fetchActiveJobs = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/v1/job/active`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await apiClient.get('/v1/job/active');
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch active jobs: ${response.statusText}`);
-    }
-
-    return await response.json();
+    return response.data;
   } catch (error) {
     console.error('Error fetching active jobs:', error);
     throw error;
@@ -35,18 +27,8 @@ export const fetchActiveJobs = async () => {
  */
 export const fetchAllJobs = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/v1/job`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch jobs: ${response.statusText}`);
-    }
-
-    return await response.json();
+    const response = await apiClient.get('/v1/job');
+    return response.data;
   } catch (error) {
     console.error('Error fetching jobs:', error);
     throw error;
@@ -60,18 +42,8 @@ export const fetchAllJobs = async () => {
  */
 export const fetchJobsByCompany = async (company) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/v1/job/company/${encodeURIComponent(company)}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch jobs by company: ${response.statusText}`);
-    }
-
-    return await response.json();
+    const response = await apiClient.get(`/v1/job/company/${encodeURIComponent(company)}`);
+    return response.data;
   } catch (error) {
     console.error('Error fetching jobs by company:', error);
     throw error;
@@ -87,24 +59,46 @@ export const fetchJobsByCompany = async (company) => {
 export const fetchJobDetail = async (jobId, userId = null) => {
   try {
     const url = userId 
-      ? `${API_BASE_URL}/v1/job/${jobId}/detail?userId=${userId}`
-      : `${API_BASE_URL}/v1/job/${jobId}/detail`;
+      ? `/v1/job/${jobId}/detail?userId=${userId}`
+      : `/v1/job/${jobId}/detail`;
     
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch job detail: ${response.statusText}`);
-    }
-
-    return await response.json();
+    const response = await apiClient.get(url);
+    return response.data;
   } catch (error) {
     console.error('Error fetching job detail:', error);
-    throw error;
+    
+    // Extract meaningful error message from axios error
+    let errorMessage = 'Failed to load job details. Please try again later.';
+    
+    if (error.response) {
+      // Server responded with error status
+      const status = error.response.status;
+      const data = error.response.data;
+      
+      if (status === 404) {
+        errorMessage = 'Job not found.';
+      } else if (status === 403) {
+        errorMessage = 'Access denied. Please check your authentication.';
+      } else if (status === 401) {
+        errorMessage = 'Authentication required. Please log in.';
+      } else if (data?.message) {
+        errorMessage = data.message;
+      } else if (data?.error) {
+        errorMessage = data.error;
+      } else {
+        errorMessage = `Failed to fetch job detail: ${error.response.statusText || status}`;
+      }
+    } else if (error.request) {
+      // Request was made but no response received
+      errorMessage = 'Network error. Please check your connection.';
+    } else {
+      // Error setting up the request
+      errorMessage = error.message || errorMessage;
+    }
+    
+    const apiError = new Error(errorMessage);
+    apiError.response = error.response;
+    throw apiError;
   }
 };
 
@@ -115,18 +109,8 @@ export const fetchJobDetail = async (jobId, userId = null) => {
  */
 export const fetchUserProfile = async (userId) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/v1/users/${userId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch user profile: ${response.statusText}`);
-    }
-
-    return await response.json();
+    const response = await apiClient.get(`/v1/users/${userId}`);
+    return response.data;
   } catch (error) {
     console.error('Error fetching user profile:', error);
     throw error;

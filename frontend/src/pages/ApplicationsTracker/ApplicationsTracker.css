@@ -16,6 +16,7 @@
 .apps__background-layer--3 { background: radial-gradient(circle, var(--primary-400) 0%, transparent 70%); opacity: 0.05; animation: float 15s ease-in-out infinite; transform: scale(1.8); }
 
 .apps__container { position: relative; z-index: 2; width: 100%; max-width: 1100px; display: flex; flex-direction: column; gap: var(--space-6); }
+.apps__nav-section { background: rgba(255,255,255,0.95); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.8); border-radius: var(--radius-2xl); padding: var(--space-6); box-shadow: var(--shadow-md); }
 
 .apps__header { text-align: left; }
 .apps__subtitle { color: var(--gray-600); margin-top: var(--space-2); }

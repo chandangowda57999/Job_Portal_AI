@@ -33,6 +33,7 @@
 .dash__tag--fit { background: var(--primary-100); color: var(--primary-700); }
 .dash__section { background: rgba(255,255,255,0.95); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.8); border-radius: var(--radius-2xl); padding: var(--space-6); box-shadow: var(--shadow-md); }
 .dash__section--compact { padding: var(--space-4); }
+
 .rectabs { display: flex; gap: var(--space-2); flex-wrap: wrap; }
 .rectabs__tab { background: white; border: 2px solid var(--gray-200); border-radius: var(--radius-full); padding: 6px 10px; display: inline-flex; align-items: center; gap: 8px; font-weight: var(--font-semibold); color: var(--gray-700); cursor: pointer; transition: all 0.2s ease; }
 .rectabs__tab:hover { border-color: var(--primary-300); }

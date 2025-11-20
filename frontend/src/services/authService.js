@@ -261,17 +261,23 @@ export const logout = async () => {
 
 /**
  * Fetches the current user's profile
+ * Uses the user ID from stored user data
  * 
  * @returns {Promise<Object>} Promise resolving to user profile data
  * @throws {Error} If profile fetch fails
  */
 export const getUserProfile = async () => {
   try {
-    const response = await apiClient.get(API_ENDPOINTS.USERS.GET_PROFILE);
+    const userData = getUserData();
+    if (!userData || !userData.id) {
+      throw new Error('User not authenticated');
+    }
+    const response = await apiClient.get(`/v1/users/${userData.id}`);
     return response.data;
   } catch (error) {
     throw new Error(
       error.response?.data?.message ||
+      error.message ||
       'Failed to fetch user profile'
     );
   }
